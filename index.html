@@ -43,10 +43,12 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 
 <div class="modal" id="modal"><div class="sheet"><div class="row between"><div class="title" id="modalTitle"></div><button class="btn secondary" onclick="closeModal()">Cerrar</button></div><div id="modalBody" style="margin-top:12px"></div></div></div>
 
-<div class="bottom"><div class="nav"><button id="nHome" onclick="show('home')">🏠<br>Ranchos</button><button id="nFarm" onclick="currentFarm?show('farm'):show('home')">🐄<br>Inventario</button><button id="nActivity" onclick="show('activity')">📋<br>Actividad</button><button id="nReports" onclick="show('reports')">📊<br>Reportes</button><button id="nSettings" onclick="show('settings')">⚙️<br>Admin</button></div></div>
+<div class="bottom"><div class="nav"><button id="nHome" onclick="show('home')">🏠<br>Ranchos</button><button id="nFarm" onclick="currentFarm ? show('farm') : show('home')">🐄<br>Inventario</button><button id="nActivity" onclick="show('activity')">📋<br>Actividad</button><button id="nReports" onclick="show('reports')">📊<br>Reportes</button><button id="nSettings" onclick="show('settings')">⚙️<br>Admin</button></div></div>
 
 <script>
 const KEY='rancho_v5_db';let db=JSON.parse(localStorage.getItem(KEY)||'{"version":5,"farms":[],"animals":[],"events":[]}'),currentFarm=null,currentAnimal=null;
+const $=id=>document.getElementById(id);
+const modal=$('modal'),modalTitle=$('modalTitle'),modalBody=$('modalBody'),farmList=$('farmList'),animalList=$('animalList'),activityList=$('activityList'),reportList=$('reportList'),farmHead=$('farmHead'),animalDetail=$('animalDetail'),search=$('search'),fileIn=$('fileIn'),xFarms=$('xFarms'),xAnimals=$('xAnimals'),xGest=$('xGest'),xMilk=$('xMilk'),fAnimals=$('fAnimals'),fFemales=$('fFemales'),fPreg=$('fPreg'),fMilk=$('fMilk');
 const uid=()=>crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random().toString(16).slice(2),today=()=>new Date().toISOString().slice(0,10);
 function save(){localStorage.setItem(KEY,JSON.stringify(db))}
 function show(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));let m={home:'nHome',farm:'nFarm',animal:'nFarm',activity:'nActivity',reports:'nReports',settings:'nSettings'};if(m[id])document.getElementById(m[id]).classList.add('active');renderAll()}
