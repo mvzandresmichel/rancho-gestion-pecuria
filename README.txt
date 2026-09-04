@@ -1,34 +1,25 @@
-RANCHO · GESTIÓN PECUARIA V5
+RANCHO · GESTIÓN PECUARIA V6
 
-Esta versión cambia la estructura a MULTI-RANCHO.
+Novedades:
+- Campo "Nombre" en la ficha individual.
+- Número interno, fechas de nacimiento/ingreso, procedencia y condición corporal.
+- Ficha individual más completa.
+- Registro de leche, reproducción y salud.
+- Reportes con gráficos de reproducción, animales atendidos/enfermedades y producción de leche.
+- Filtro de reportes por rancho.
+- Prevención de aretes duplicados dentro del mismo rancho.
+- Eliminación de rancho con confirmación.
+- Respaldo/restauración JSON.
+- PWA instalable desde HTTPS.
+- Intenta migrar automáticamente los datos locales de V5.
 
-Incluye:
-- Alta y edición de varios ranchos.
-- Inventario independiente por rancho.
-- Aretes únicos dentro de cada rancho.
-- Ficha de animales.
-- Genealogía básica.
-- Eventos reproductivos.
-- Eventos sanitarios.
-- Producción de leche.
-- Actividad consolidada.
-- Reportes por rancho.
-- Respaldo/restauración de toda la plataforma.
-- PWA instalable cuando se sirve desde HTTPS.
+IMPORTANTE:
+Esta versión todavía usa almacenamiento local del dispositivo. No es todavía una nube multiusuario real.
+Para sincronización entre teléfonos y usuarios se debe conectar autenticación + base de datos con permisos por rancho.
+GitHub Pages sirve para publicar la aplicación, pero no debe contener datos privados.
 
-ARQUITECTURA DE DATOS
-Rancho -> Animales -> Eventos.
-Cada animal y evento queda asociado mediante farmId.
-
-IMPORTANTE SOBRE LA NUBE
-V5 todavía es una edición privada LOCAL. No se incluyeron claves, contraseñas ni servicios de nube ficticios.
-Para sincronizar realmente varios teléfonos/computadoras se necesita:
-1) elegir un proveedor de autenticación/base de datos;
-2) crear el proyecto/cuenta;
-3) configurar credenciales;
-4) aplicar reglas de seguridad por usuario y rancho;
-5) desplegar la PWA mediante HTTPS.
-
-Esto evita almacenar credenciales inseguras dentro del ZIP.
-
-V5.3: agrega eliminación protegida de ranchos, eliminando también animales y eventos asociados, con confirmación.
+Para actualizar en GitHub Pages:
+1. Reemplazar index.html, manifest.json, sw.js e icon.svg por estos archivos.
+2. Mantener el mismo repositorio.
+3. Esperar a que GitHub Pages publique la nueva versión.
+4. En el teléfono, abrir la aplicación y recargar si sigue apareciendo la versión anterior.
