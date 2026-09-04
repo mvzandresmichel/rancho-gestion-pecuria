@@ -30,3 +30,5 @@ Para sincronizar realmente varios teléfonos/computadoras se necesita:
 5) desplegar la PWA mediante HTTPS.
 
 Esto evita almacenar credenciales inseguras dentro del ZIP.
+
+V5.3: agrega eliminación protegida de ranchos, eliminando también animales y eventos asociados, con confirmación.
