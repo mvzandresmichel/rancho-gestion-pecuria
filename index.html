@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#176b38">
 <link rel="manifest" href="manifest.json">
-<title>Rancho · Gestión Pecuaria V6</title>
+<title>Rancho · Gestión Pecuaria V6.2</title>
 <style>
 :root{--g:#176b38;--g2:#0d5229;--bg:#f3f7f3;--c:#fff;--t:#183024;--m:#68766d;--l:#dce6df;--r:#a73535;--a:#f4b942}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--t)}
@@ -26,7 +26,7 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 </style>
 </head>
 <body>
-<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6 · Registro bovino y análisis del rancho</div></header>
+<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6.2 · Registro bovino, salud, producción y control del rancho</div></header>
 <main>
 <section id="home" class="view active">
   <div class="row between"><div><div class="title">Mis ranchos</div><div class="small">Administrador local</div></div><button class="btn primary" onclick="openFarm()">＋ Rancho</button></div>
@@ -47,6 +47,7 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
     <div class="card stat"><b id="fPreg">0</b><span>Gestantes</span></div>
     <div class="card stat"><b id="fMilk">0 L</b><span>Leche registrada</span></div>
   </div>
+  <div id="farmModules"></div>
   <div class="section row between"><span>Inventario</span><button class="btn primary" onclick="openAnimal()">＋ Animal</button></div>
   <input id="search" class="search" placeholder="Buscar arete, nombre, raza, lote o número interno" oninput="renderFarm()">
   <div class="card" id="animalList"></div>
@@ -63,14 +64,14 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 <section id="reports" class="view">
   <div class="row between"><div><div class="title">Reportes y gráficos</div><div class="small">Los gráficos se calculan con tus registros.</div></div>
   <select id="reportFarm" style="max-width:210px" onchange="renderReports()"><option value="all">Todos los ranchos</option></select></div>
-  <div class="tabs"><button id="tabRepro" class="active" onclick="setReportTab('repro')">🧬 Reproducción</button><button id="tabHealth" onclick="setReportTab('health')">🩺 Salud</button><button id="tabProd" onclick="setReportTab('prod')">🥛 Producción</button></div>
+  <div class="tabs"><button id="tabRepro" class="active" onclick="setReportTab('repro')">🧬 Reproducción</button><button id="tabHealth" onclick="setReportTab('health')">🩺 Salud</button><button id="tabProd" onclick="setReportTab('prod')">🥛 Producción</button><button id="tabHerd" onclick="setReportTab('herd')">💉 Hato</button><button id="tabSales" onclick="setReportTab('sales')">💰 Salidas</button></div>
   <div id="reportContent"></div>
 </section>
 
 <section id="settings" class="view">
   <div class="title">Administración</div>
   <div class="section">Usuarios y permisos</div><div class="card"><b>👑 Administrador</b><p class="small">La V6 conserva la estructura multi-rancho. La sincronización multiusuario real se podrá conectar posteriormente a un backend con autenticación y permisos por rancho.</p></div>
-  <div class="section">Datos</div><div class="card row"><button class="btn primary" onclick="backup()">Descargar respaldo V6</button><button class="btn secondary" onclick="fileIn.click()">Restaurar</button><input id="fileIn" type="file" accept=".json" style="display:none" onchange="restore(event)"></div>
+  <div class="section">Datos</div><div class="card row"><button class="btn primary" onclick="backup()">Descargar respaldo V6.2</button><button class="btn secondary" onclick="fileIn.click()">Restaurar</button><input id="fileIn" type="file" accept=".json" style="display:none" onchange="restore(event)"></div>
   <div class="section">Migración</div><div class="card small">La V6 intenta conservar automáticamente los datos que ya existan en la V5 local del mismo dispositivo.</div>
 </section>
 </main>
@@ -85,16 +86,16 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 </div></div>
 
 <script>
-const V6KEY='rancho_v6_db';
+const V6KEY='rancho_v61_db';
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random().toString(16).slice(2)}
 function today(){return new Date().toISOString().slice(0,10)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function monthLabel(k){let [y,m]=k.split('-');return new Date(Number(y),Number(m)-1,1).toLocaleDateString('es-MX',{month:'short',year:'2-digit'}).replace('.','')}
-function blankDB(){return {version:6,farms:[],animals:[],events:[]}}
+function blankDB(){return {version:61,farms:[],animals:[],events:[],campaigns:[],transactions:[]}}
 function loadDB(){
-  try{let d=JSON.parse(localStorage.getItem(V6KEY)||'null');if(d&&Array.isArray(d.farms))return d}catch(e){}
-  try{let old=JSON.parse(localStorage.getItem('rancho_v5_db')||'null');if(old&&Array.isArray(old.farms)){
-    old.version=6;old.animals=(old.animals||[]).map(a=>({...a,name:a.name||'',internalId:a.internalId||'',birthDate:a.birthDate||'',entryDate:a.entryDate||'',origin:a.origin||'',condition:a.condition||''}));
+  try{let d=JSON.parse(localStorage.getItem(V6KEY)||'null');if(d&&Array.isArray(d.farms)){d.campaigns=d.campaigns||[];d.transactions=d.transactions||[];return d}}catch(e){}
+  try{let old=JSON.parse(localStorage.getItem('rancho_v6_db')||localStorage.getItem('rancho_v5_db')||'null');if(old&&Array.isArray(old.farms)){
+    old.version=61;old.campaigns=old.campaigns||[];old.transactions=old.transactions||[];old.animals=(old.animals||[]).map(a=>({...a,name:a.name||'',internalId:a.internalId||'',birthDate:a.birthDate||'',entryDate:a.entryDate||'',origin:a.origin||'',condition:a.condition||''}));
     old.events=(old.events||[]).map(e=>({...e,diagnosis:e.diagnosis||'',treatment:e.treatment||'',attended:e.attended??(e.type==='health'),reproEvent:e.reproEvent||''}));
     return old;
   }}catch(e){}
@@ -106,8 +107,14 @@ function show(id){document.querySelectorAll('.view').forEach(v=>v.classList.remo
 function renderAll(){renderHome();if(currentFarm)renderFarm();renderActivity();renderReports()}
 function farmAnimals(fid){return db.animals.filter(a=>a.farmId===fid)}
 function farmEvents(fid){return db.events.filter(e=>e.farmId===fid)}
+function farmCampaigns(fid){return (db.campaigns||[]).filter(c=>c.farmId===fid)}
+function farmTransactions(fid){return (db.transactions||[]).filter(t=>t.farmId===fid)}
+function activeAnimals(fid){return farmAnimals(fid).filter(a=>!['Vendido','Muerto','Transferido'].includes(a.status||''))}
+function mapsUrl(f){return f?.lat&&f?.lng?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(f.lat+','+f.lng)}`:''}
+function daysUntil(date){if(!date)return null;return Math.ceil((new Date(date+'T00:00:00')-new Date(today()+'T00:00:00'))/86400000)}
+
 function renderHome(){
-  xFarms.textContent=db.farms.length;xAnimals.textContent=db.animals.length;xGest.textContent=db.animals.filter(a=>a.repro==='Gestante').length;
+  xFarms.textContent=db.farms.length;xAnimals.textContent=db.animals.filter(a=>!['Vendido','Muerto','Transferido'].includes(a.status||'')).length;xGest.textContent=db.animals.filter(a=>a.repro==='Gestante').length;
   xMilk.textContent=db.events.filter(e=>e.type==='milk').reduce((s,e)=>s+Number(e.liters||0),0).toFixed(1)+' L';
   farmList.innerHTML=db.farms.length?db.farms.map(f=>{let n=farmAnimals(f.id).length;return `<div class="farm" onclick="selectFarm('${f.id}')"><div class="row between"><div><b>🐄 ${esc(f.name)}</b><div class="small">${esc(f.location||'Ubicación no registrada')} · ${esc(f.production||'Producción general')}</div></div><span class="tag">${n} animales</span></div></div>`}).join(''):'<div class="empty">Aún no tienes ranchos.<br><br><button class="btn primary" onclick="openFarm()">＋ Crear primer rancho</button></div>'
 }
@@ -118,8 +125,22 @@ function renderFarm(){
   let list=aa.filter(a=>(a.tag+' '+a.name+' '+a.breed+' '+a.lot+' '+a.internalId).toLowerCase().includes(q));
   fAnimals.textContent=aa.length;fFemales.textContent=aa.filter(a=>a.sex==='Hembra').length;fPreg.textContent=aa.filter(a=>a.repro==='Gestante').length;
   fMilk.textContent=farmEvents(f.id).filter(e=>e.type==='milk').reduce((s,e)=>s+Number(e.liters||0),0).toFixed(1)+' L';
+  renderFarmModules(f);
   animalList.innerHTML=list.length?list.map(a=>`<div class="animal" onclick="selectAnimal('${a.id}')"><div class="avatar">🐄</div><div style="flex:1"><b>${esc(a.name||'Sin nombre')} <span class="small">(${esc(a.tag)})</span></b><div class="small">${esc(a.breed||'Sin raza')} · ${esc(a.sex)} · Lote ${esc(a.lot||'—')} · Int. ${esc(a.internalId||'—')}</div></div><span class="tag">${esc(a.repro||'No aplica')}</span>›</div>`).join(''):'<div class="empty">Sin animales registrados.</div>'
 }
+function renderFarmModules(f){
+  let aa=farmAnimals(f.id),active=activeAnimals(f.id),sold=farmTransactions(f.id).filter(t=>t.type==='sale'),dead=farmTransactions(f.id).filter(t=>t.type==='mortality');
+  let cs=farmCampaigns(f.id), vaccines=cs.filter(c=>c.kind==='vacuna'), deworms=cs.filter(c=>c.kind==='desparasitacion');
+  let upcoming=cs.filter(c=>c.nextDate).sort((a,b)=>a.nextDate.localeCompare(b.nextDate)).slice(0,5);
+  farmModules.innerHTML=`<div class="grid">
+    <div class="card stat"><b>${active.length}</b><span>Inventario activo</span></div><div class="card stat"><b>${sold.length}</b><span>Ventas registradas</span></div><div class="card stat"><b>${dead.length}</b><span>Bajas por mortalidad</span></div><div class="card stat"><b>${cs.length}</b><span>Campañas sanitarias</span></div></div>
+    <div class="section">📍 Ubicación del rancho</div><div class="card">${f.lat&&f.lng?`<b>Coordenadas:</b> ${esc(f.lat)}, ${esc(f.lng)} <span class="small">· Actualizada: ${esc(f.locationUpdated||'')}</span><div class="row" style="margin-top:10px"><a class="btn primary" href="${mapsUrl(f)}" target="_blank" rel="noopener">🗺️ Abrir en Google Maps</a><button class="btn secondary" onclick="openFarm('${f.id}')">📍 Actualizar pin</button></div>`:`<div class="small">Aún no hay geoposición guardada.</div><button class="btn primary" style="margin-top:10px" onclick="openFarm('${f.id}')">📍 Establecer ubicación</button>`}</div>
+    <div class="section row between"><span>💉 Vacunación del hato</span><button class="btn primary" onclick="openCampaign('vacuna')">＋ Registrar vacunación</button></div><div class="card">${campaignTable(vaccines,'vacuna')}</div>
+    <div class="section row between"><span>💊 Desparasitación del hato</span><button class="btn primary" onclick="openCampaign('desparasitacion')">＋ Registrar desparasitación</button></div><div class="card">${campaignTable(deworms,'desparasitacion')}</div>
+    <div class="section row between"><span>💰 Ventas y ☠️ mortalidad</span><span><button class="btn secondary" onclick="openTransaction('sale')">＋ Venta</button> <button class="btn danger" onclick="openTransaction('mortality')">＋ Mortalidad</button></span></div><div class="card"><div class="small">Ventas: ${sold.length} · Mortalidades: ${dead.length}</div></div>
+    <div class="section">🚨 Próximas acciones sanitarias</div><div class="card">${upcoming.length?upcoming.map(c=>{let d=daysUntil(c.nextDate);return `<div class="event"><b>${c.kind==='vacuna'?'💉 Revacunación':'💊 Redesparasitación'}: ${esc(c.name)}</b><div class="small">${esc(c.nextDate)} · ${d<0?'Vencida':d===0?'Hoy':'En '+d+' días'} · ${esc(c.coverage||'')}</div></div>`}).join(''):'<div class="empty">Sin próximas campañas registradas.</div>'}</div>`;
+}
+function campaignTable(list,kind){if(!list.length)return '<div class="empty">Sin campañas registradas.</div>';return '<div style="overflow:auto"><table style="width:100%;font-size:12px;border-collapse:collapse"><tr><th style="text-align:left">Programa</th><th>Última aplicación</th><th>Próxima</th><th>Animales</th></tr>'+list.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,8).map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.date||'')}</td><td>${esc(c.nextDate||'—')}</td><td>${esc(c.treated||0)}/${esc(c.planned||0)}</td></tr>`).join('')+'</table></div>'}
 function selectAnimal(id){currentAnimal=id;show('animal')}
 function renderAnimal(){
   let a=db.animals.find(x=>x.id===currentAnimal),f=db.farms.find(x=>x.id===a?.farmId);if(!a)return;
@@ -184,12 +205,22 @@ function renderProdReport(an,ev){
   <div class="section">Tendencia de producción</div>${reportBox('Leche registrada por mes','Suma de litros capturados durante los últimos 6 meses.',svgLine(data,'value','Leche registrada por mes'))}`;
 }
 
+function renderHerdReport(an){let fid=document.getElementById('reportFarm').value,cs=fid==='all'?(db.campaigns||[]):farmCampaigns(fid),v=cs.filter(c=>c.kind==='vacuna'),d=cs.filter(c=>c.kind==='desparasitacion');let pending=cs.filter(c=>c.nextDate&&daysUntil(c.nextDate)<=30).length;reportContent.innerHTML=`<div class="kpi"><div class="pill"><span class="small">Campañas</span><b>${cs.length}</b></div><div class="pill"><span class="small">Vacunación</span><b>${v.length}</b></div><div class="pill"><span class="small">Desparasitación</span><b>${d.length}</b></div><div class="pill"><span class="small">Próximas ≤30 días</span><b>${pending}</b></div></div><div class="section">Programa sanitario del hato</div><div class="card">${campaignTable(cs,'')}</div>`}
+function renderSalesReport(an){let fid=document.getElementById('reportFarm').value,ts=fid==='all'?(db.transactions||[]):farmTransactions(fid),sales=ts.filter(t=>t.type==='sale'),mort=ts.filter(t=>t.type==='mortality'),income=sales.reduce((s,t)=>s+Number(t.totalPrice||0),0),byCause={};mort.forEach(t=>byCause[t.cause||'Desconocida']=(byCause[t.cause||'Desconocida']||0)+1);let top=Object.entries(byCause).map(([label,value])=>({label,value}));reportContent.innerHTML=`<div class="kpi"><div class="pill"><span class="small">Animales vendidos</span><b>${sales.length}</b></div><div class="pill"><span class="small">Ingreso por ventas</span><b>$${income.toFixed(2)}</b></div><div class="pill"><span class="small">Mortalidades</span><b>${mort.length}</b></div><div class="pill"><span class="small">Salidas totales</span><b>${sales.length+mort.length}</b></div></div><div class="section">Principales causas de mortalidad</div>${reportBox('Mortalidad','Número de bajas por causa.',svgBars(top,'value','Causas de mortalidad'))}`}
+function openCampaign(kind){
+  let label=kind==='vacuna'?'Vacunación del hato':'Desparasitación del hato';modalTitle.textContent=label;
+  modalBody.innerHTML=`<form onsubmit="saveCampaign(event,'${kind}')"><div class="field"><label>Programa / producto *</label><input id="cc1" required placeholder="${kind==='vacuna'?'Ej. Clostridiales, IBR-BVD, Brucelosis':'Ej. Ivermectina, Albendazol'}"></div><div class="grid"><div class="field"><label>Fecha de aplicación *</label><input id="cc2" type="date" required value="${today()}"></div><div class="field"><label>Intervalo (meses) *</label><input id="cc3" type="number" min="1" required value="6"></div><div class="field"><label>Animales programados</label><input id="cc4" type="number" min="0" value="${activeAnimals(currentFarm).length}"></div><div class="field"><label>Animales ${kind==='vacuna'?'vacunados':'tratados'}</label><input id="cc5" type="number" min="0" value="${activeAnimals(currentFarm).length}"></div></div><div class="field"><label>Lote / referencia</label><input id="cc6"></div><div class="field"><label>Responsable</label><input id="cc7"></div><div class="field"><label>Observaciones</label><textarea id="cc8" rows="2"></textarea></div><button class="btn primary">Guardar campaña</button></form>`;modal.classList.add('open')
+}
+function saveCampaign(e,kind){e.preventDefault();let months=Number(cc3.value||0),d=new Date(cc2.value+'T00:00:00');d.setMonth(d.getMonth()+months);let c={id:uid(),farmId:currentFarm,kind,name:cc1.value.trim(),date:cc2.value,intervalMonths:months,nextDate:d.toISOString().slice(0,10),planned:Number(cc4.value||0),treated:Number(cc5.value||0),coverage:`${cc5.value||0}/${cc4.value||0}`,batch:cc6.value.trim(),responsible:cc7.value.trim(),notes:cc8.value.trim()};db.campaigns.push(c);save();closeModal();renderAll()}
+function openTransaction(type){let label=type==='sale'?'Venta de animal':'Baja por mortalidad', aa=activeAnimals(currentFarm);modalTitle.textContent=label;modalBody.innerHTML=`<form onsubmit="saveTransaction(event,'${type}')"><div class="field"><label>Animal *</label><select id="tt1" required>${aa.map(a=>`<option value="${a.id}">${esc(a.name||'Sin nombre')} · Arete ${esc(a.tag)}</option>`).join('')}</select></div><div class="grid"><div class="field"><label>Fecha *</label><input id="tt2" type="date" required value="${today()}"></div><div class="field"><label>Peso kg</label><input id="tt3" type="number" step=".1" min="0"></div>${type==='sale'?`<div class="field"><label>Precio por kg</label><input id="tt4" type="number" step=".01" min="0"></div><div class="field"><label>Precio total</label><input id="tt5" type="number" step=".01" min="0"></div>`:`<div class="field"><label>Causa de muerte *</label><select id="tt6" required><option>Enfermedad</option><option>Accidente</option><option>Distocia</option><option>Intoxicación</option><option>Depredación</option><option>Desconocida</option><option>Otra</option></select></div>`}</div>${type==='sale'?`<div class="field"><label>Motivo de venta</label><select id="tt6"><option>Descarte reproductivo</option><option>Baja producción</option><option>Edad</option><option>Problema sanitario</option><option>Problema reproductivo</option><option>Excedente</option><option>Engorda</option><option>Otro</option></select></div>`:''}<div class="field"><label>Comprador / destino</label><input id="tt7"></div><div class="field"><label>Observaciones</label><textarea id="tt8" rows="2"></textarea></div><button class="btn ${type==='sale'?'primary':'danger'}">Registrar ${type==='sale'?'venta':'mortalidad'}</button></form>`;modal.classList.add('open')}
+function saveTransaction(e,type){e.preventDefault();let a=db.animals.find(x=>x.id===tt1.value);if(!a)return;let t={id:uid(),farmId:currentFarm,animalId:a.id,type,date:tt2.value,weight:Number(tt3.value||0),destination:tt7.value.trim(),notes:tt8.value.trim()};if(type==='sale'){t.pricePerKg=Number(tt4.value||0);t.totalPrice=Number(tt5.value||0);t.reason=tt6.value;a.status='Vendido'}else{t.cause=tt6.value;a.status='Muerto'};db.transactions.push(t);save();closeModal();show('farm')}
 function openFarm(id=''){
   let f=db.farms.find(x=>x.id===id)||{};modalTitle.textContent=id?'Editar rancho':'Nuevo rancho';
-  modalBody.innerHTML=`<form onsubmit="saveFarm(event,'${id}')"><div class="field"><label>Nombre del rancho *</label><input id="ff1" required value="${esc(f.name||'')}"></div><div class="field"><label>Ubicación</label><input id="ff2" value="${esc(f.location||'')}"></div><div class="field"><label>Responsable</label><input id="ff3" value="${esc(f.manager||'')}"></div><div class="field"><label>Tipo de producción</label><select id="ff4"><option>Leche</option><option>Carne</option><option>Doble propósito</option><option>Cría</option><option>Mixto</option></select></div><button class="btn primary">Guardar rancho</button></form>`;
-  if(f.production)ff4.value=f.production;modal.classList.add('open')
+  modalBody.innerHTML=`<form onsubmit="saveFarm(event,'${id}')"><div class="field"><label>Nombre del rancho *</label><input id="ff1" required value="${esc(f.name||'')}"></div><div class="field"><label>Localidad / ubicación</label><input id="ff2" value="${esc(f.location||'')}"></div><div class="field"><label>Responsable</label><input id="ff3" value="${esc(f.manager||'')}"></div><div class="field"><label>Tipo de producción</label><select id="ff4"><option>Leche</option><option>Carne</option><option>Doble propósito</option><option>Cría</option><option>Engorda</option><option>Mixto</option><option>Otro</option></select></div><div class="grid"><div class="field"><label>Superficie (ha)</label><input id="ff5" type="number" step=".01" min="0" value="${esc(f.area||'')}"></div><div class="field"><label>Número de potreros</label><input id="ff6" type="number" min="0" value="${esc(f.paddocks||'')}"></div></div><div class="field"><label>Geoposición — latitud</label><input id="ffLat" type="number" step="any" value="${esc(f.lat||'')}"></div><div class="field"><label>Geoposición — longitud</label><input id="ffLng" type="number" step="any" value="${esc(f.lng||'')}"></div><button type="button" class="btn secondary" onclick="useCurrentLocation()">📍 Usar mi ubicación actual</button>${f.lat&&f.lng?`<a class="btn secondary" href="${mapsUrl(f)}" target="_blank" rel="noopener">🗺️ Abrir ubicación en Google Maps</a>`:''}<div class="field"><label>Observaciones</label><textarea id="ff7" rows="2">${esc(f.notes||'')}</textarea></div><button class="btn primary">Guardar rancho</button></form>`;
+  ff4.value=f.production||'Leche';modal.classList.add('open')
 }
-function saveFarm(e,id){e.preventDefault();if(id){let f=db.farms.find(x=>x.id===id);Object.assign(f,{name:ff1.value.trim(),location:ff2.value.trim(),manager:ff3.value.trim(),production:ff4.value})}else{let f={id:uid(),name:ff1.value.trim(),location:ff2.value.trim(),manager:ff3.value.trim(),production:ff4.value};db.farms.push(f);currentFarm=f.id}save();closeModal();show(currentFarm?'farm':'home')}
+function useCurrentLocation(){if(!navigator.geolocation)return alert('Este dispositivo no permite obtener la ubicación automáticamente. Puedes introducir latitud y longitud manualmente.');navigator.geolocation.getCurrentPosition(pos=>{ffLat.value=pos.coords.latitude.toFixed(7);ffLng.value=pos.coords.longitude.toFixed(7)},()=>alert('No se pudo obtener la ubicación. Revisa que la tablet tenga activada la ubicación y permita el acceso al navegador.'))}
+function saveFarm(e,id){e.preventDefault();let lat=ffLat.value.trim(),lng=ffLng.value.trim();if((lat&&!lng)||(!lat&&lng))return alert('Para guardar la geoposición captura latitud y longitud, o usa “Usar mi ubicación actual”.');if(lat&& (Number(lat)<-90||Number(lat)>90))return alert('Latitud no válida.');if(lng&&(Number(lng)<-180||Number(lng)>180))return alert('Longitud no válida.');let obj={name:ff1.value.trim(),location:ff2.value.trim(),manager:ff3.value.trim(),production:ff4.value,area:ff5.value,paddocks:ff6.value,lat:lat?Number(lat):'',lng:lng?Number(lng):'',locationUpdated:lat&&lng?today():'',notes:ff7.value.trim()};if(id){let f=db.farms.find(x=>x.id===id);Object.assign(f,obj)}else{let f={id:uid(),...obj};db.farms.push(f);currentFarm=f.id}save();closeModal();show(currentFarm?'farm':'home')}
 function deleteFarm(id){let f=db.farms.find(x=>x.id===id);if(!f)return;let n=farmAnimals(id).length;if(!confirm(`Eliminar "${f.name}" y sus ${n} animales y registros? Esta acción no se puede deshacer.`))return;db.farms=db.farms.filter(x=>x.id!==id);db.animals=db.animals.filter(x=>x.farmId!==id);db.events=db.events.filter(x=>x.farmId!==id);if(currentFarm===id)currentFarm=null;save();show('home')}
 
 function openAnimal(id=''){
@@ -222,9 +253,9 @@ function saveEvent(e,type){
   db.events.push(ev);save();closeModal();renderAnimal();show('animal')
 }
 function closeModal(){modal.classList.remove('open')}
-function backup(){let blob=new Blob([JSON.stringify({...db,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rancho_Pecuario_V6_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
-function restore(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.farms)||!Array.isArray(d.animals)||!Array.isArray(d.events))throw 0;db=d;db.version=6;save();currentFarm=null;currentAnimal=null;show('home');alert('Respaldo restaurado.')}catch{alert('Respaldo no válido.')}};r.readAsText(f)}
-save();renderAll();show('home');if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+function backup(){let blob=new Blob([JSON.stringify({...db,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rancho_Pecuario_V62_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function restore(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.farms)||!Array.isArray(d.animals)||!Array.isArray(d.events))throw 0;db=d;db.version=61;db.campaigns=db.campaigns||[];db.transactions=db.transactions||[];save();currentFarm=null;currentAnimal=null;show('home');alert('Respaldo restaurado.')}catch{alert('Respaldo no válido.')}};r.readAsText(f)}
+save();renderAll();show('home');if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js?v=62').catch(()=>{}));
 </script>
 </body>
 </html>

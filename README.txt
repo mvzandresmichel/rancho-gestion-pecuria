@@ -1,25 +1,13 @@
-RANCHO · GESTIÓN PECUARIA V6
+RANCHO · GESTIÓN PECUARIA V6.2
 
-Novedades:
-- Campo "Nombre" en la ficha individual.
-- Número interno, fechas de nacimiento/ingreso, procedencia y condición corporal.
-- Ficha individual más completa.
-- Registro de leche, reproducción y salud.
-- Reportes con gráficos de reproducción, animales atendidos/enfermedades y producción de leche.
-- Filtro de reportes por rancho.
-- Prevención de aretes duplicados dentro del mismo rancho.
-- Eliminación de rancho con confirmación.
-- Respaldo/restauración JSON.
-- PWA instalable desde HTTPS.
-- Intenta migrar automáticamente los datos locales de V5.
+Actualización sobre V6:
+- Ficha del rancho con geoposición (latitud/longitud), botón para usar ubicación actual y enlace a Google Maps.
+- Inventario activo con entradas y salidas diferenciadas.
+- Registro de ventas de animales con peso, precio/kg, precio total, comprador/destino y motivo.
+- Registro de bajas por mortalidad con causa y observaciones.
+- Campañas de vacunación y desparasitación del hato.
+- Próximas revacunaciones y redesparasitaciones calculadas por intervalo.
+- Reportes de hato sanitario y salidas (ventas/mortalidad).
+- Conserva datos locales de V5/V6 en el mismo dispositivo mediante migración automática.
 
-IMPORTANTE:
-Esta versión todavía usa almacenamiento local del dispositivo. No es todavía una nube multiusuario real.
-Para sincronización entre teléfonos y usuarios se debe conectar autenticación + base de datos con permisos por rancho.
-GitHub Pages sirve para publicar la aplicación, pero no debe contener datos privados.
-
-Para actualizar en GitHub Pages:
-1. Reemplazar index.html, manifest.json, sw.js e icon.svg por estos archivos.
-2. Mantener el mismo repositorio.
-3. Esperar a que GitHub Pages publique la nueva versión.
-4. En el teléfono, abrir la aplicación y recargar si sigue apareciendo la versión anterior.
+IMPORTANTE: sigue siendo una aplicación local. Los datos del rancho se guardan en el navegador del dispositivo y NO se suben a GitHub. Para sincronización multiusuario/multidispositivo se requerirá backend, autenticación y base de datos.
