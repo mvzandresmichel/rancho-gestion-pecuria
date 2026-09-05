@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#176b38">
 <link rel="manifest" href="manifest.json">
-<title>Rancho · Gestión Pecuaria V6.5</title>
+<title>Rancho · Gestión Pecuaria V6.6</title>
 <style>
 :root{--g:#176b38;--g2:#0d5229;--bg:#f3f7f3;--c:#fff;--t:#183024;--m:#68766d;--l:#dce6df;--r:#a73535;--a:#f4b942}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--t)}
@@ -21,12 +21,12 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 .tabs{display:flex;gap:7px;overflow:auto;margin:10px 0}.tabs button{white-space:nowrap;border:1px solid var(--l);background:#fff;border-radius:999px;padding:8px 11px;font-weight:800;color:var(--m)}.tabs button.active{background:#e8f1eb;color:var(--g2);border-color:#b9d2c0}
 .chartbox{background:#fff;border:1px solid var(--l);border-radius:15px;padding:12px;margin-bottom:12px}.charttitle{font-weight:900}.chartsub{font-size:11px;color:var(--m);margin:3px 0 8px}.chart{width:100%;height:250px;display:block}.legend{font-size:11px;color:var(--m)}
 .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.pill{padding:9px;border-radius:10px;background:#f7faf7;border:1px solid var(--l)}.pill b{display:block;color:var(--g);font-size:19px}
-.profilegrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.profilegrid div{padding:9px;background:#f7faf7;border-radius:10px}.profilegrid span{display:block;font-size:10px;color:var(--m)}.profilegrid b{font-size:13px}
+.animalphoto{width:82px;height:82px;object-fit:cover;border-radius:14px;border:1px solid var(--l);background:#e8f1eb;display:block}.photo-preview{display:flex;gap:10px;align-items:center}.profilegrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.profilegrid div{padding:9px;background:#f7faf7;border-radius:10px}.profilegrid span{display:block;font-size:10px;color:var(--m)}.profilegrid b{font-size:13px}
 @media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr)}.modal{align-items:center}.sheet{border-radius:18px}.profilegrid{grid-template-columns:repeat(4,1fr)}.kpi{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
 <body>
-<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6.5 · Registro bovino, salud, producción, dietas y control del rancho</div></header>
+<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6.6 · Registro bovino, salud, producción, dietas y control del rancho</div></header>
 <main>
 <section id="home" class="view active">
   <div class="row between"><div><div class="title">Mis ranchos</div><div class="small">Administrador local</div></div><button class="btn primary" onclick="openFarm()">＋ Rancho</button></div>
@@ -71,7 +71,14 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 <section id="settings" class="view">
   <div class="title">Administración</div>
   <div class="section">Usuarios y permisos</div><div class="card"><b>👑 Administrador</b><p class="small">La V6 conserva la estructura multi-rancho. La sincronización multiusuario real se podrá conectar posteriormente a un backend con autenticación y permisos por rancho.</p></div>
-  <div class="section">Datos</div><div class="card row"><button class="btn primary" onclick="backup()">Descargar respaldo V6.5</button><button class="btn secondary" onclick="fileIn.click()">Restaurar</button><input id="fileIn" type="file" accept=".json" style="display:none" onchange="restore(event)"></div>
+
+  <div class="section">☁️ Nube y sincronización</div>
+  <div class="card" id="cloudCard">
+    <b>Estado de la nube</b>
+    <div id="cloudStatus" class="small" style="margin:6px 0 10px">Comprobando conexión…</div>
+    <div id="cloudLogin"></div>
+  </div>
+  <div class="section">Datos</div><div class="card row"><button class="btn primary" onclick="backup()">Descargar respaldo V6.6</button><button class="btn secondary" onclick="fileIn.click()">Restaurar</button><input id="fileIn" type="file" accept=".json" style="display:none" onchange="restore(event)"></div>
   <div class="section">Transferencia entre dispositivos</div>
   <div class="card">
     <b>📱 Tablet ↔ 📱 Teléfono</b>
@@ -82,8 +89,8 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
     </div>
     <p class="small" style="margin-top:8px">En el teléfono: recibe el archivo, abre la aplicación y usa “Importar respaldo”. La copia sustituye los datos actuales del teléfono por los del archivo.</p>
   </div>
-  <div class="section">Sincronización en la nube</div><div class="card small">La sincronización automática en tiempo real entre teléfono y tablet requiere una base de datos en la nube con autenticación. La aplicación actual sigue siendo local para proteger tus datos y no inventa una conexión de nube.</div>
-  <div class="section">Migración</div><div class="card small">V6.5 conserva automáticamente los datos de V6.1/V6.2 en el mismo dispositivo.</div>
+  <div class="section">Migración</div><div class="card small">V6.6 conserva los datos locales. Inicia sesión arriba y usa <b>Subir datos locales a la nube</b> una sola vez para migrar esta copia. Después, los cambios guardados se sincronizan automáticamente.</div>
+  <div class="section">Migración</div><div class="card small">V6.6 conserva automáticamente los datos de V6.1/V6.2 en el mismo dispositivo.</div>
 </section>
 </main>
 
@@ -96,9 +103,14 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 <button id="nSettings" onclick="show('settings')">⚙️<br>Admin</button>
 </div></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL="https://zfglodjafmqkemjrrlbk.supabase.co";
+const SUPABASE_KEY="sb_publishable_vNcIT6BmCqlTxL78Q4f6KA_Nkgqu_Y";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+let cloudUser=null, cloudBusy=false, cloudTimer=null, realtimeChannel=null;
 const V6KEY='rancho_v61_db';
-const APP_VERSION='6.5';
+const APP_VERSION='6.6';
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random().toString(16).slice(2)}
 function today(){return new Date().toISOString().slice(0,10)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
@@ -114,7 +126,7 @@ function loadDB(){
   return blankDB()
 }
 let db=loadDB(),currentFarm=null,currentAnimal=null,reportTab='repro';
-function save(){localStorage.setItem(V6KEY,JSON.stringify(db))}
+function save(){localStorage.setItem(V6KEY,JSON.stringify(db));queueCloudSync()}
 function show(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));let m={home:'nHome',farm:'nFarm',animal:'nFarm',activity:'nActivity',reports:'nReports',settings:'nSettings'};if(m[id])document.getElementById(m[id]).classList.add('active');renderAll()}
 function renderAll(){renderHome();if(currentFarm)renderFarm();if(currentAnimal)renderAnimal();renderActivity();renderReports()}
 function farmAnimals(fid){return db.animals.filter(a=>a.farmId===fid)}
@@ -126,6 +138,175 @@ function animalDiets(aid){return (db.diets||[]).filter(d=>d.animalId===aid).sort
 function activeAnimals(fid){return farmAnimals(fid).filter(a=>!['Vendido','Muerto','Transferido'].includes(a.status||''))}
 function mapsUrl(f){return f?.lat&&f?.lng?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(f.lat+','+f.lng)}`:''}
 function daysUntil(date){if(!date)return null;return Math.ceil((new Date(date+'T00:00:00')-new Date(today()+'T00:00:00'))/86400000)}
+
+
+function cloudEsc(s){return String(s??'')}
+function setCloudStatus(text,ok=true){
+  const el=document.getElementById('cloudStatus');
+  if(el){el.textContent=text;el.style.color=ok?'var(--g)':'var(--r)'}
+}
+function renderCloudCard(){
+  const login=document.getElementById('cloudLogin');
+  if(!login)return;
+  if(cloudUser){
+    login.innerHTML=`<div class="small">Sesión: <b>${esc(cloudUser.email||'')}</b></div>
+      <div class="row" style="margin-top:10px;flex-wrap:wrap">
+        <button class="btn primary" onclick="uploadLocalToCloud()">☁️ Subir datos locales a la nube</button>
+        <button class="btn secondary" onclick="downloadCloudToLocal()">⬇️ Descargar de la nube</button>
+        <button class="btn danger" onclick="cloudSignOut()">Cerrar sesión</button>
+      </div>
+      <div class="small" style="margin-top:8px">La sincronización automática queda activa en este dispositivo.</div>`;
+    setCloudStatus('Conectado a la nube · sincronización activa');
+  }else{
+    login.innerHTML=`<form onsubmit="cloudSignIn(event)">
+      <div class="field"><label>Correo</label><input id="cloudEmail" type="email" required autocomplete="username"></div>
+      <div class="field"><label>Contraseña</label><input id="cloudPassword" type="password" required autocomplete="current-password"></div>
+      <button class="btn primary">🔐 Iniciar sesión</button>
+    </form>
+    <div class="small" style="margin-top:8px">Usa el usuario que creaste en Supabase. No guardamos la contraseña en la aplicación.</div>`;
+    setCloudStatus('No has iniciado sesión',false);
+  }
+}
+async function cloudSignIn(e){
+  e.preventDefault();
+  setCloudStatus('Iniciando sesión…');
+  const {data,error}=await sb.auth.signInWithPassword({email:cloudEmail.value.trim(),password:cloudPassword.value});
+  if(error){setCloudStatus('No se pudo iniciar sesión: '+error.message,false);return;}
+  cloudUser=data.user; renderCloudCard(); await startRealtime(); await downloadCloudToLocal(true);
+}
+async function cloudSignOut(){
+  await sb.auth.signOut();
+  cloudUser=null;
+  if(realtimeChannel){await sb.removeChannel(realtimeChannel);realtimeChannel=null;}
+  renderCloudCard();
+}
+function rowFarm(f){
+  return {id:f.id,owner_id:cloudUser.id,name:f.name||'Rancho sin nombre',ranch_code:f.ranchCode||null,owner_name:f.ownerName||null,manager:f.manager||null,locality:f.location||null,municipality:f.municipality||null,state:f.state||null,surface_ha:f.area!==''&&f.area!=null?Number(f.area):null,paddocks:f.paddocks!==''&&f.paddocks!=null?Number(f.paddocks):null,latitude:f.lat!==''&&f.lat!=null?Number(f.lat):null,longitude:f.lng!==''&&f.lng!=null?Number(f.lng):null,observations:f.notes||null,active:f.active!==false};
+}
+function rowAnimal(a){
+  return {id:a.id,farm_id:a.farmId,owner_id:cloudUser.id,official_tag:a.tag||null,internal_number:a.internalId||null,name:a.name||null,species:a.species||'Bovino',breed:a.breed||null,sex:a.sex||null,lot:a.lot||null,birth_date:a.birthDate||null,entry_date:a.entryDate||null,origin:a.origin||null,weight:a.weight!==''&&a.weight!=null?Number(a.weight):null,body_condition:a.condition!==''&&a.condition!=null?Number(a.condition):null,sire:a.sire||null,dam:a.dam||null,reproductive_status:a.repro||null,status:(a.status||'active').toLowerCase()==='active'?'active':a.status||'active',observations:a.observations||null};
+}
+function rowEvent(e){
+  return {id:e.id,farm_id:e.farmId,animal_id:e.animalId,owner_id:cloudUser.id,event_type:e.type||'other',event_date:e.date||today(),diagnosis:e.diagnosis||null,treatment:e.treatment||null,result:e.result||null,service_number:e.serviceNumber||null,bull_or_semen:e.bullOrSemen||null,pregnancy_result:e.pregnancyResult||null,milk_liters:e.liters!=null?Number(e.liters):null,weight:e.weight!=null&&e.weight!==''?Number(e.weight):null,observations:e.notes||e.observations||null};
+}
+function rowCampaign(c){
+  return {id:c.id,farm_id:c.farmId,owner_id:cloudUser.id,campaign_type:c.kind||'otro',program:c.name||null,product:c.product||null,application_date:c.date||today(),interval_months:c.intervalMonths||null,scheduled_count:c.planned||0,applied_count:c.treated||0,batch:c.batch||null,responsible:c.responsible||null,observations:c.notes||null,next_date:c.nextDate||null};
+}
+function rowDiet(d){
+  return {id:d.id,farm_id:d.farmId,animal_id:d.animalId,owner_id:cloudUser.id,start_date:d.startDate||today(),end_date:d.endDate||null,diet_name:d.name||d.dietName||null,kg_per_animal_day:d.kgPerAnimalDay!=null?Number(d.kgPerAnimalDay):null,milk_at_start:d.milkAtStart!=null?Number(d.milkAtStart):null,weight_at_start:d.weightAtStart!=null?Number(d.weightAtStart):null,body_condition:d.bodyCondition!=null?Number(d.bodyCondition):null,ingredients:d.ingredients||null,responsible:d.responsible||null,notes:d.notes||null};
+}
+function rowTransaction(t){
+  return {id:t.id,farm_id:t.farmId,animal_id:t.animalId,owner_id:cloudUser.id,transaction_type:t.type||'other',transaction_date:t.date||today(),weight:t.weight!=null&&t.weight!==''?Number(t.weight):null,price_per_kg:t.pricePerKg!=null?Number(t.pricePerKg):null,total_price:t.totalPrice!=null?Number(t.totalPrice):null,reason:t.reason||null,buyer:t.buyer||null,destination:t.destination||null,cause:t.cause||null,diagnosis:t.diagnosis||null,necropsy:t.necropsy||null,previous_treatment:t.previousTreatment||null,responsible:t.responsible||null,observations:t.notes||t.observations||null};
+}
+async function uploadLocalToCloud(){
+  if(!cloudUser)return alert('Primero inicia sesión.');
+  if(!confirm('Esto subirá a la nube los datos de ESTE dispositivo. No borra los datos locales. ¿Continuar?'))return;
+  cloudBusy=true;setCloudStatus('Subiendo datos locales a la nube…');
+  try{
+    const batches=[
+      ['farms',(db.farms||[]).map(rowFarm)],
+      ['animals',(db.animals||[]).map(rowAnimal)],
+      ['events',(db.events||[]).map(rowEvent)],
+      ['campaigns',(db.campaigns||[]).map(rowCampaign)],
+      ['diets',(db.diets||[]).map(rowDiet)],
+      ['transactions',(db.transactions||[]).map(rowTransaction)]
+    ];
+    for(const [table,rows] of batches){
+      if(!rows.length)continue;
+      const {error}=await sb.from(table).upsert(rows,{onConflict:'id'});
+      if(error)throw new Error(table+': '+error.message);
+    }
+    setCloudStatus('Migración completada · datos locales respaldados en la nube');
+    alert('Listo. Los datos locales se copiaron a Supabase. Ahora podemos probar el teléfono.');
+  }catch(err){
+    setCloudStatus('Error al subir: '+err.message,false);
+    alert('No se pudieron subir todos los datos: '+err.message);
+  }finally{cloudBusy=false;}
+}
+async function downloadCloudToLocal(silent=false){
+  if(!cloudUser)return;
+  if(!silent && !confirm('Esto reemplazará los datos locales de ESTE dispositivo por los datos de la nube. ¿Continuar?'))return;
+  cloudBusy=true;setCloudStatus('Descargando datos de la nube…');
+  try{
+    const tables=['farms','animals','events','campaigns','diets','transactions'];
+    const got={};
+    for(const table of tables){
+      const {data,error}=await sb.from(table).select('*');
+      if(error)throw new Error(table+': '+error.message);
+      got[table]=data||[];
+    }
+    const farms=got.farms.map(f=>({id:f.id,name:f.name||'',location:f.locality||'',manager:f.manager||'',production:'',area:f.surface_ha??'',paddocks:f.paddocks??'',lat:f.latitude??'',lng:f.longitude??'',locationUpdated:f.latitude!=null&&f.longitude!=null?today():'',notes:f.observations||''}));
+    const animals=got.animals.map(a=>({id:a.id,farmId:a.farm_id,tag:a.official_tag||'',internalId:a.internal_number||'',name:a.name||'',sex:a.sex||'Hembra',breed:a.breed||'',lot:a.lot||'',weight:a.weight??'',condition:a.body_condition??'',birthDate:a.birth_date||'',entryDate:a.entry_date||'',sire:a.sire||'',dam:a.dam||'',origin:a.origin||'',repro:a.reproductive_status||'No aplica',status:(a.status||'active').toLowerCase()==='active'?'active':a.status,photo:'',observations:a.observations||''}));
+    const events=got.events.map(e=>({id:e.id,farmId:e.farm_id,animalId:e.animal_id,type:e.event_type,date:e.event_date,diagnosis:e.diagnosis||'',treatment:e.treatment||'',result:e.result||'',liters:e.milk_liters??'',weight:e.weight??'',notes:e.observations||'',reproEvent:e.event_type==='repro'?e.observations||'':''}));
+    const campaigns=got.campaigns.map(c=>({id:c.id,farmId:c.farm_id,kind:c.campaign_type,name:c.program||'',date:c.application_date,intervalMonths:c.interval_months||0,nextDate:c.next_date||'',planned:c.scheduled_count||0,treated:c.applied_count||0,coverage:`${c.applied_count||0}/${c.scheduled_count||0}`,batch:c.batch||'',responsible:c.responsible||'',notes:c.observations||''}));
+    const diets=got.diets.map(d=>({id:d.id,farmId:d.farm_id,animalId:d.animal_id,startDate:d.start_date,endDate:d.end_date||'',name:d.diet_name||'',kgPerAnimalDay:d.kg_per_animal_day??'',milkAtStart:d.milk_at_start??'',weightAtStart:d.weight_at_start??'',bodyCondition:d.body_condition??'',ingredients:d.ingredients||'',responsible:d.responsible||'',notes:d.notes||''}));
+    const transactions=got.transactions.map(t=>({id:t.id,farmId:t.farm_id,animalId:t.animal_id,type:t.transaction_type,date:t.transaction_date,weight:t.weight??'',pricePerKg:t.price_per_kg??'',totalPrice:t.total_price??'',reason:t.reason||'',buyer:t.buyer||'',destination:t.destination||'',cause:t.cause||'',diagnosis:t.diagnosis||'',necropsy:t.necropsy||'',previousTreatment:t.previous_treatment||'',responsible:t.responsible||'',notes:t.observations||''}));
+    db={version:66,farms,animals,events,campaigns,transactions,diets};
+    save();
+    currentFarm=null;currentAnimal=null;renderAll();
+    setCloudStatus('Descarga completada · datos locales actualizados');
+    if(!silent)alert('Datos descargados de la nube correctamente.');
+  }catch(err){
+    setCloudStatus('Error al descargar: '+err.message,false);
+    if(!silent)alert('No se pudieron descargar los datos: '+err.message);
+  }finally{cloudBusy=false;}
+}
+function queueCloudSync(){
+  if(!cloudUser || cloudBusy)return;
+  clearTimeout(cloudTimer);
+  cloudTimer=setTimeout(async()=>{
+    try{await uploadLocalSilent()}catch(e){console.warn('Cloud sync:',e)}
+  },1200);
+}
+async function uploadLocalSilent(){
+  if(!cloudUser)return;
+  const batches=[
+    ['farms',(db.farms||[]).map(rowFarm)],
+    ['animals',(db.animals||[]).map(rowAnimal)],
+    ['events',(db.events||[]).map(rowEvent)],
+    ['campaigns',(db.campaigns||[]).map(rowCampaign)],
+    ['diets',(db.diets||[]).map(rowDiet)],
+    ['transactions',(db.transactions||[]).map(rowTransaction)]
+  ];
+  for(const [table,rows] of batches){
+    if(!rows.length)continue;
+    const {error}=await sb.from(table).upsert(rows,{onConflict:'id'});
+    if(error)throw error;
+  }
+  setCloudStatus('Conectado a la nube · último guardado sincronizado');
+}
+async function startRealtime(){
+  if(!cloudUser)return;
+  if(realtimeChannel){await sb.removeChannel(realtimeChannel);realtimeChannel=null;}
+  realtimeChannel=sb.channel('rancho-gestion-realtime')
+    .on('postgres_changes',{event:'*',schema:'public',table:'farms',filter:`owner_id=eq.${cloudUser.id}`},()=>downloadCloudToLocal(true))
+    .on('postgres_changes',{event:'*',schema:'public',table:'animals',filter:`owner_id=eq.${cloudUser.id}`},()=>downloadCloudToLocal(true))
+    .on('postgres_changes',{event:'*',schema:'public',table:'events',filter:`owner_id=eq.${cloudUser.id}`},()=>downloadCloudToLocal(true))
+    .on('postgres_changes',{event:'*',schema:'public',table:'campaigns',filter:`owner_id=eq.${cloudUser.id}`},()=>downloadCloudToLocal(true))
+    .on('postgres_changes',{event:'*',schema:'public',table:'diets',filter:`owner_id=eq.${cloudUser.id}`},()=>downloadCloudToLocal(true))
+    .on('postgres_changes',{event:'*',schema:'public',table:'transactions',filter:`owner_id=eq.${cloudUser.id}`},()=>downloadCloudToLocal(true))
+    .subscribe((status)=>{if(status==='SUBSCRIBED')setCloudStatus('Conectado a la nube · tiempo real activo')});
+}
+async function initCloud(){
+  try{
+    const {data}=await sb.auth.getSession();
+    cloudUser=data.session?.user||null;
+    renderCloudCard();
+    if(cloudUser)await startRealtime();
+  }catch(e){setCloudStatus('No se pudo inicializar la nube',false)}
+}
+sb.auth.onAuthStateChange((event,session)=>{
+  cloudUser=session?.user||null;
+  renderCloudCard();
+  if(cloudUser && event!=='INITIAL_SESSION')startRealtime();
+});
+function photoPicked(input){
+  const file=input.files?.[0];
+  if(!file)return;
+  const hidden=document.getElementById('aaPhoto');
+  const dt=new DataTransfer();dt.items.add(file);hidden.files=dt.files;
+  const label=document.getElementById('photoChosen');if(label)label.textContent='Nueva foto seleccionada: '+file.name;
+}
 
 function renderHome(){
   xFarms.textContent=db.farms.length;xAnimals.textContent=db.animals.filter(a=>!['Vendido','Muerto','Transferido'].includes(a.status||'')).length;xGest.textContent=db.animals.filter(a=>a.repro==='Gestante').length;
@@ -140,7 +321,7 @@ function renderFarm(){
   fAnimals.textContent=aa.length;fFemales.textContent=aa.filter(a=>a.sex==='Hembra').length;fPreg.textContent=aa.filter(a=>a.repro==='Gestante').length;
   fMilk.textContent=farmEvents(f.id).filter(e=>e.type==='milk').reduce((s,e)=>s+Number(e.liters||0),0).toFixed(1)+' L';
   renderFarmModules(f);
-  animalList.innerHTML=list.length?list.map(a=>`<div class="animal" onclick="selectAnimal('${a.id}')"><div class="avatar">🐄</div><div style="flex:1"><b>${esc(a.name||'Sin nombre')} <span class="small">(${esc(a.tag)})</span></b><div class="small">${esc(a.breed||'Sin raza')} · ${esc(a.sex)} · Lote ${esc(a.lot||'—')} · Int. ${esc(a.internalId||'—')}</div></div><span class="tag">${esc(a.repro||'No aplica')}</span>›</div>`).join(''):'<div class="empty">Sin animales registrados.</div>'
+  animalList.innerHTML=list.length?list.map(a=>`<div class="animal" onclick="selectAnimal('${a.id}')"><div class="avatar">${a.photo?`<img src="${a.photo}" style="width:44px;height:44px;object-fit:cover;border-radius:12px">`:'🐄'}</div><div style="flex:1"><b>${esc(a.name||'Sin nombre')} <span class="small">(${esc(a.tag)})</span></b><div class="small">${esc(a.breed||'Sin raza')} · ${esc(a.sex)} · Lote ${esc(a.lot||'—')} · Int. ${esc(a.internalId||'—')}</div></div><span class="tag">${esc(a.repro||'No aplica')}</span>›</div>`).join(''):'<div class="empty">Sin animales registrados.</div>'
 }
 function renderFarmModules(f){
   let aa=farmAnimals(f.id),active=activeAnimals(f.id),sold=farmTransactions(f.id).filter(t=>t.type==='sale'),dead=farmTransactions(f.id).filter(t=>t.type==='mortality');
@@ -162,7 +343,7 @@ function renderAnimal(){
   let ds=animalDiets(a.id);
   let milkEvents=ev.filter(e=>e.type==='milk');
   let avgMilk=milkEvents.length?(milkEvents.reduce((s,e)=>s+Number(e.liters||0),0)/milkEvents.length).toFixed(1):'—';
-  animalDetail.innerHTML=`<div class="card" style="margin-top:12px"><div class="row between"><div><div class="title">🐄 ${esc(a.name||'Sin nombre')}</div><div class="small">Arete: ${esc(a.tag)} · ${esc(f?.name||'')} · Estado: ${esc(a.status||'Activo')}</div></div><button class="btn secondary" onclick="openAnimal('${a.id}')">Editar ficha</button></div>
+  animalDetail.innerHTML=`<div class="card" style="margin-top:12px"><div class="row between"><div class="row" style="align-items:center"><div>${a.photo?`<img class="animalphoto" src="${a.photo}" alt="Foto del animal">`:'<div class="animalphoto" style="display:grid;place-items:center;font-size:38px">🐄</div>'}</div><div><div class="title">🐄 ${esc(a.name||'Sin nombre')}</div><div class="small">Arete: ${esc(a.tag)} · ${esc(f?.name||'')} · Estado: ${esc(a.status||'Activo')}</div></div></div><button class="btn secondary" onclick="openAnimal('${a.id}')">Editar ficha</button></div>
   <div class="profilegrid" style="margin-top:12px">
   <div><span>Arete</span><b>${esc(a.tag)}</b></div><div><span>Número interno</span><b>${esc(a.internalId||'—')}</b></div><div><span>Raza</span><b>${esc(a.breed||'—')}</b></div><div><span>Sexo</span><b>${esc(a.sex)}</b></div>
   <div><span>Fecha nacimiento</span><b>${esc(a.birthDate||'—')}</b></div><div><span>Ingreso</span><b>${esc(a.entryDate||'—')}</b></div><div><span>Lote</span><b>${esc(a.lot||'—')}</b></div><div><span>Peso</span><b>${esc(a.weight||'—')} kg</b></div>
@@ -259,13 +440,22 @@ function openAnimal(id=''){
   <div class="grid"><div class="field"><label>Padre</label><input id="aa6" value="${esc(a.sire||'')}"></div><div class="field"><label>Madre</label><input id="aa7" value="${esc(a.dam||'')}"></div></div>
   <div class="field"><label>Procedencia</label><input id="aaOrigin" placeholder="Nacimiento, compra, otro rancho..." value="${esc(a.origin||'')}"></div>
   <div class="field"><label>Estado reproductivo</label><select id="aa8"><option>No aplica</option><option>Vacía</option><option>Gestante</option><option>Seca</option><option>Parida reciente</option><option>Novilla</option></select></div>
+  <div class="field"><label>📷 Foto del animal</label><div class="photo-preview">${a.photo?`<img class="animalphoto" src="${a.photo}" alt="Foto actual">`:''}</div><div class="row"><button type="button" class="btn secondary" onclick="aaCamera.click()">📷 Tomar foto</button><button type="button" class="btn secondary" onclick="aaGallery.click()">🖼️ Galería</button></div><input id="aaCamera" type="file" accept="image/*" capture="environment" style="display:none" onchange="photoPicked(this)"><input id="aaGallery" type="file" accept="image/*" style="display:none" onchange="photoPicked(this)"><input id="aaPhoto" type="file" accept="image/*" style="display:none"><div id="photoChosen" class="small">No se ha seleccionado una nueva foto.</div><div class="small">La foto se guarda localmente. La ficha y el respaldo la conservan; la sincronización de fotos a almacenamiento de nube se incorporará después para no arriesgar tus imágenes durante la primera migración.</div></div>
   <button class="btn primary">${id?'Guardar cambios':'Guardar animal'}</button></form>`;
   aa2.value=a.sex||'Hembra';aa8.value=a.repro||'No aplica';modal.classList.add('open')
 }
-function saveAnimal(e,id){
+async function imageToDataUrl(file){
+  if(!file)return '';
+  if(!file.type.startsWith('image/'))throw new Error('El archivo seleccionado no es una imagen.');
+  return new Promise((resolve,reject)=>{let r=new FileReader();r.onload=()=>{let img=new Image();img.onload=()=>{let max=900,scale=Math.min(1,max/Math.max(img.width,img.height)),w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale)),c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);resolve(c.toDataURL('image/jpeg',.78))};img.onerror=reject;img.src=r.result};r.onerror=reject;r.readAsDataURL(file)})
+}
+async function saveAnimal(e,id){
   e.preventDefault();let tag=aa1.value.trim(),existing=db.animals.find(a=>a.farmId===currentFarm&&a.tag.toLowerCase()===tag.toLowerCase()&&a.id!==id);if(existing)return alert('Ese arete ya existe en este rancho.');
-  let obj={farmId:currentFarm,tag,name:aaName.value.trim(),internalId:aaInt.value.trim(),sex:aa2.value,breed:aa3.value.trim(),lot:aa4.value.trim(),weight:aa5.value,condition:aaCond.value.trim(),birthDate:aaBirth.value,entryDate:aaEntry.value,sire:aa6.value.trim(),dam:aa7.value.trim(),origin:aaOrigin.value.trim(),repro:aa8.value};
-  if(id){let a=db.animals.find(x=>x.id===id);Object.assign(a,obj);currentAnimal=id}else{obj.id=uid();db.animals.push(obj);currentAnimal=obj.id}save();closeModal();show('farm')}
+  let aOld=db.animals.find(x=>x.id===id),photo=aOld?.photo||'';
+  try{if(aaPhoto.files[0])photo=await imageToDataUrl(aaPhoto.files[0])}catch(err){return alert('No se pudo cargar la imagen. Selecciona otra foto.');}
+  let obj={farmId:currentFarm,tag,name:aaName.value.trim(),internalId:aaInt.value.trim(),sex:aa2.value,breed:aa3.value.trim(),lot:aa4.value.trim(),weight:aa5.value,condition:aaCond.value.trim(),birthDate:aaBirth.value,entryDate:aaEntry.value,sire:aa6.value.trim(),dam:aa7.value.trim(),origin:aaOrigin.value.trim(),repro:aa8.value,photo};
+  if(id){let a=db.animals.find(x=>x.id===id);Object.assign(a,obj);currentAnimal=id}else{obj.id=uid();db.animals.push(obj);currentAnimal=obj.id}save();closeModal();show('farm')
+}
 function openEvent(type){
   let a=db.animals.find(x=>x.id===currentAnimal);if(!a)return;modalTitle.textContent={milk:'Producción de leche',repro:'Evento reproductivo',health:'Atención sanitaria'}[type];
   let fields=type==='milk'?`<div class="field"><label>Litros *</label><input id="ee2" type="number" step=".1" min="0" required></div><div class="field"><label>Ordeña</label><select id="ee3"><option>Mañana</option><option>Tarde</option><option>Única</option></select></div>`:type==='repro'?`<div class="field"><label>Evento</label><select id="ee2"><option>Servicio</option><option>Diagnóstico positivo</option><option>Diagnóstico negativo</option><option>Parto</option><option>Aborto</option><option>Secado</option><option>Revisión reproductiva</option></select></div><div class="field"><label>Observaciones</label><input id="ee3"></div>`:`<div class="field"><label>Diagnóstico / enfermedad *</label><input id="ee2" required placeholder="Ej. mastitis, metritis, neumonía..."></div><div class="field"><label>Tratamiento / procedimiento</label><input id="ee3" placeholder="Medicamento, manejo, cirugía, etc."></div><div class="field"><label>Resultado / observaciones</label><textarea id="ee4" rows="2"></textarea></div>`;
@@ -280,10 +470,10 @@ function saveEvent(e,type){
 }
 function closeModal(){modal.classList.remove('open')}
 function backupBlob(){return new Blob([JSON.stringify({...db,exportedAt:new Date().toISOString(),appVersion:APP_VERSION},null,2)],{type:'application/json'})}
-function backup(){let blob=backupBlob(),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rancho_Pecuario_V65_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
-async function shareBackup(){let blob=backupBlob(),name='Rancho_Pecuario_V65_'+today()+'.json';try{let file=new File([blob],name,{type:'application/json'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:'Respaldo Rancho Gestión Pecuaria',text:'Respaldo de datos para transferir a otro dispositivo.',files:[file]});return;}backup();alert('Este dispositivo no permite compartir archivos directamente. Se descargó el respaldo; puedes enviarlo por WhatsApp, Drive o correo.')}catch(err){if(err&&err.name==='AbortError')return;backup();alert('Se descargó el respaldo para que puedas enviarlo al otro dispositivo.')}}
+function backup(){let blob=backupBlob(),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rancho_Pecuario_V66_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+async function shareBackup(){let blob=backupBlob(),name='Rancho_Pecuario_V66_'+today()+'.json';try{let file=new File([blob],name,{type:'application/json'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:'Respaldo Rancho Gestión Pecuaria',text:'Respaldo de datos para transferir a otro dispositivo.',files:[file]});return;}backup();alert('Este dispositivo no permite compartir archivos directamente. Se descargó el respaldo; puedes enviarlo por WhatsApp, Drive o correo.')}catch(err){if(err&&err.name==='AbortError')return;backup();alert('Se descargó el respaldo para que puedas enviarlo al otro dispositivo.')}}
 function restore(e){let f=e.target.files[0];if(!f)return;if(!confirm('Esto reemplazará los datos actuales de ESTE dispositivo por los del respaldo. ¿Continuar?')){e.target.value='';return;}let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.farms)||!Array.isArray(d.animals)||!Array.isArray(d.events))throw 0;db=d;db.version=65;db.campaigns=db.campaigns||[];db.transactions=db.transactions||[];db.diets=db.diets||[];save();currentFarm=null;currentAnimal=null;show('home');alert('Respaldo restaurado correctamente.')}catch{alert('Respaldo no válido.')}};r.readAsText(f);e.target.value=''}
-save();renderAll();show('home');if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js?v=65').catch(()=>{}));
+save();renderAll();show('home');initCloud();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js?v=66').catch(()=>{}));
 </script>
 </body>
 </html>
