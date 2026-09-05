@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#176b38">
 <link rel="manifest" href="manifest.json">
-<title>Rancho · Gestión Pecuaria V6.2</title>
+<title>Rancho · Gestión Pecuaria V6.5</title>
 <style>
 :root{--g:#176b38;--g2:#0d5229;--bg:#f3f7f3;--c:#fff;--t:#183024;--m:#68766d;--l:#dce6df;--r:#a73535;--a:#f4b942}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--t)}
@@ -26,7 +26,7 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 </style>
 </head>
 <body>
-<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6.4 · Registro bovino, salud, producción y control del rancho</div></header>
+<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6.5 · Registro bovino, salud, producción, dietas y control del rancho</div></header>
 <main>
 <section id="home" class="view active">
   <div class="row between"><div><div class="title">Mis ranchos</div><div class="small">Administrador local</div></div><button class="btn primary" onclick="openFarm()">＋ Rancho</button></div>
@@ -71,7 +71,7 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 <section id="settings" class="view">
   <div class="title">Administración</div>
   <div class="section">Usuarios y permisos</div><div class="card"><b>👑 Administrador</b><p class="small">La V6 conserva la estructura multi-rancho. La sincronización multiusuario real se podrá conectar posteriormente a un backend con autenticación y permisos por rancho.</p></div>
-  <div class="section">Datos</div><div class="card row"><button class="btn primary" onclick="backup()">Descargar respaldo V6.4</button><button class="btn secondary" onclick="fileIn.click()">Restaurar</button><input id="fileIn" type="file" accept=".json" style="display:none" onchange="restore(event)"></div>
+  <div class="section">Datos</div><div class="card row"><button class="btn primary" onclick="backup()">Descargar respaldo V6.5</button><button class="btn secondary" onclick="fileIn.click()">Restaurar</button><input id="fileIn" type="file" accept=".json" style="display:none" onchange="restore(event)"></div>
   <div class="section">Transferencia entre dispositivos</div>
   <div class="card">
     <b>📱 Tablet ↔ 📱 Teléfono</b>
@@ -83,7 +83,7 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
     <p class="small" style="margin-top:8px">En el teléfono: recibe el archivo, abre la aplicación y usa “Importar respaldo”. La copia sustituye los datos actuales del teléfono por los del archivo.</p>
   </div>
   <div class="section">Sincronización en la nube</div><div class="card small">La sincronización automática en tiempo real entre teléfono y tablet requiere una base de datos en la nube con autenticación. La aplicación actual sigue siendo local para proteger tus datos y no inventa una conexión de nube.</div>
-  <div class="section">Migración</div><div class="card small">V6.4 conserva automáticamente los datos de V6.1/V6.2 en el mismo dispositivo.</div>
+  <div class="section">Migración</div><div class="card small">V6.5 conserva automáticamente los datos de V6.1/V6.2 en el mismo dispositivo.</div>
 </section>
 </main>
 
@@ -98,16 +98,16 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 
 <script>
 const V6KEY='rancho_v61_db';
-const APP_VERSION='6.3';
+const APP_VERSION='6.5';
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random().toString(16).slice(2)}
 function today(){return new Date().toISOString().slice(0,10)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function monthLabel(k){let [y,m]=k.split('-');return new Date(Number(y),Number(m)-1,1).toLocaleDateString('es-MX',{month:'short',year:'2-digit'}).replace('.','')}
-function blankDB(){return {version:61,farms:[],animals:[],events:[],campaigns:[],transactions:[]}}
+function blankDB(){return {version:65,farms:[],animals:[],events:[],campaigns:[],transactions:[],diets:[]}}
 function loadDB(){
-  try{let d=JSON.parse(localStorage.getItem(V6KEY)||'null');if(d&&Array.isArray(d.farms)){d.campaigns=d.campaigns||[];d.transactions=d.transactions||[];return d}}catch(e){}
+  try{let d=JSON.parse(localStorage.getItem(V6KEY)||'null');if(d&&Array.isArray(d.farms)){d.campaigns=d.campaigns||[];d.transactions=d.transactions||[];d.diets=d.diets||[];d.version=65;return d}}catch(e){}
   try{let old=JSON.parse(localStorage.getItem('rancho_v6_db')||localStorage.getItem('rancho_v5_db')||'null');if(old&&Array.isArray(old.farms)){
-    old.version=61;old.campaigns=old.campaigns||[];old.transactions=old.transactions||[];old.animals=(old.animals||[]).map(a=>({...a,name:a.name||'',internalId:a.internalId||'',birthDate:a.birthDate||'',entryDate:a.entryDate||'',origin:a.origin||'',condition:a.condition||''}));
+    old.version=65;old.campaigns=old.campaigns||[];old.transactions=old.transactions||[];old.diets=old.diets||[];old.animals=(old.animals||[]).map(a=>({...a,name:a.name||'',internalId:a.internalId||'',birthDate:a.birthDate||'',entryDate:a.entryDate||'',origin:a.origin||'',condition:a.condition||''}));
     old.events=(old.events||[]).map(e=>({...e,diagnosis:e.diagnosis||'',treatment:e.treatment||'',attended:e.attended??(e.type==='health'),reproEvent:e.reproEvent||''}));
     return old;
   }}catch(e){}
@@ -121,6 +121,8 @@ function farmAnimals(fid){return db.animals.filter(a=>a.farmId===fid)}
 function farmEvents(fid){return db.events.filter(e=>e.farmId===fid)}
 function farmCampaigns(fid){return (db.campaigns||[]).filter(c=>c.farmId===fid)}
 function farmTransactions(fid){return (db.transactions||[]).filter(t=>t.farmId===fid)}
+function farmDiets(fid){return (db.diets||[]).filter(d=>d.farmId===fid)}
+function animalDiets(aid){return (db.diets||[]).filter(d=>d.animalId===aid).sort((x,y)=>(y.startDate||'').localeCompare(x.startDate||''))}
 function activeAnimals(fid){return farmAnimals(fid).filter(a=>!['Vendido','Muerto','Transferido'].includes(a.status||''))}
 function mapsUrl(f){return f?.lat&&f?.lng?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(f.lat+','+f.lng)}`:''}
 function daysUntil(date){if(!date)return null;return Math.ceil((new Date(date+'T00:00:00')-new Date(today()+'T00:00:00'))/86400000)}
@@ -157,13 +159,25 @@ function selectAnimal(id){currentAnimal=id;show('animal')}
 function renderAnimal(){
   let a=db.animals.find(x=>x.id===currentAnimal),f=db.farms.find(x=>x.id===a?.farmId);if(!a)return;
   let ev=db.events.filter(e=>e.animalId===a.id).sort((x,y)=>y.date.localeCompare(x.date));
-  animalDetail.innerHTML=`<div class="card" style="margin-top:12px"><div class="row between"><div><div class="title">🐄 ${esc(a.name||'Sin nombre')}</div><div class="small">Arete: ${esc(a.tag)} · ${esc(f?.name||'')} </div></div><button class="btn secondary" onclick="openAnimal('${a.id}')">Editar ficha</button></div>
+  let ds=animalDiets(a.id);
+  let milkEvents=ev.filter(e=>e.type==='milk');
+  let avgMilk=milkEvents.length?(milkEvents.reduce((s,e)=>s+Number(e.liters||0),0)/milkEvents.length).toFixed(1):'—';
+  animalDetail.innerHTML=`<div class="card" style="margin-top:12px"><div class="row between"><div><div class="title">🐄 ${esc(a.name||'Sin nombre')}</div><div class="small">Arete: ${esc(a.tag)} · ${esc(f?.name||'')} · Estado: ${esc(a.status||'Activo')}</div></div><button class="btn secondary" onclick="openAnimal('${a.id}')">Editar ficha</button></div>
   <div class="profilegrid" style="margin-top:12px">
   <div><span>Arete</span><b>${esc(a.tag)}</b></div><div><span>Número interno</span><b>${esc(a.internalId||'—')}</b></div><div><span>Raza</span><b>${esc(a.breed||'—')}</b></div><div><span>Sexo</span><b>${esc(a.sex)}</b></div>
   <div><span>Fecha nacimiento</span><b>${esc(a.birthDate||'—')}</b></div><div><span>Ingreso</span><b>${esc(a.entryDate||'—')}</b></div><div><span>Lote</span><b>${esc(a.lot||'—')}</b></div><div><span>Peso</span><b>${esc(a.weight||'—')} kg</b></div>
   <div><span>Estado reproductivo</span><b>${esc(a.repro||'—')}</b></div><div><span>Padre</span><b>${esc(a.sire||'—')}</b></div><div><span>Madre</span><b>${esc(a.dam||'—')}</b></div><div><span>Condición corporal</span><b>${esc(a.condition||'—')}</b></div>
-  </div><div class="section">Registrar</div><div class="row"><button class="btn primary" onclick="openEvent('milk')">🥛 Leche</button><button class="btn secondary" onclick="openEvent('repro')">🧬 Reproducción</button><button class="btn secondary" onclick="openEvent('health')">🩺 Salud</button></div></div>
-  <div class="section">Historial</div><div class="card">${ev.length?ev.map(eventHTML).join(''):'<div class="empty">Sin eventos.</div>'}</div>`
+  </div><div class="kpi" style="margin-top:10px"><div class="pill"><b>${milkEvents.length}</b><span class="small">Registros de leche</span></div><div class="pill"><b>${avgMilk}${avgMilk==='—'?'':' L'}</b><span class="small">Promedio registrado</span></div><div class="pill"><b>${ds.length}</b><span class="small">Dietas registradas</span></div><div class="pill"><b>${ev.length}</b><span class="small">Eventos totales</span></div></div>
+  <div class="section">Registrar</div><div class="row"><button class="btn primary" onclick="openEvent('milk')">🥛 Leche</button><button class="btn secondary" onclick="openEvent('repro')">🧬 Reproducción</button><button class="btn secondary" onclick="openEvent('health')">🩺 Salud</button><button class="btn secondary" onclick="openDiet()">🥣 Dieta</button></div></div>
+  <div class="section row between"><span>🥣 Historial de dietas</span><button class="btn primary" onclick="openDiet()">＋ Registrar dieta</button></div>
+  <div class="card">${ds.length?ds.map(d=>`<div class="event"><b>🥣 ${esc(d.name||'Dieta sin nombre')}</b><div class="small">${esc(d.startDate||'')} → ${esc(d.endDate||'Vigente')} · ${d.kgPerDay?esc(d.kgPerDay)+' kg/animal/día · ':''}${d.weightStart?esc(d.weightStart)+' kg · ':''}${d.conditionStart?'CC '+esc(d.conditionStart):''}</div><div class="small">${d.composition?esc(d.composition):''}${d.milkStart?' · Leche al inicio: '+esc(d.milkStart)+' L':''}${d.responsible?' · Responsable: '+esc(d.responsible):''}</div>${d.notes?`<div class="small">📝 ${esc(d.notes)}</div>`:''}</div>`).join(''):'<div class="empty">Sin dietas registradas para este animal.</div>'}</div>
+  <div class="section">Historial completo</div><div class="card">${ev.length?ev.map(eventHTML).join(''):'<div class="empty">Sin eventos.</div>'}</div>`
+}
+function openDiet(){
+  let a=db.animals.find(x=>x.id===currentAnimal);if(!a)return;modalTitle.textContent='Historial de dieta';
+  modalBody.innerHTML=`<form onsubmit="saveDiet(event)"><div class="field"><label>Animal</label><input value="${esc(a.name||'Sin nombre')} · Arete ${esc(a.tag)}" disabled></div><div class="grid"><div class="field"><label>Fecha de inicio *</label><input id="dd1" type="date" required value="${today()}"></div><div class="field"><label>Fecha de término</label><input id="dd2" type="date"></div></div><div class="field"><label>Nombre / identificación de la dieta *</label><input id="dd3" required placeholder="Ej. Dieta 121 · Producción media"></div><div class="grid"><div class="field"><label>Cantidad kg/animal/día</label><input id="dd4" type="number" step=".01" min="0"></div><div class="field"><label>Leche al inicio (L/día)</label><input id="dd5" type="number" step=".1" min="0"></div><div class="field"><label>Peso al inicio (kg)</label><input id="dd6" type="number" step=".1" min="0"></div><div class="field"><label>Condición corporal</label><input id="dd7" placeholder="Ej. 3.0"></div></div><div class="field"><label>Ingredientes / composición</label><textarea id="dd8" rows="3" placeholder="Ej. ensilaje, maíz, DDGS, soya, mineral..."></textarea></div><div class="field"><label>Responsable</label><input id="dd9"></div><div class="field"><label>Observaciones</label><textarea id="dd10" rows="2"></textarea></div><button class="btn primary">Guardar dieta</button></form>`;modal.classList.add('open')
+}
+function saveDiet(e){e.preventDefault();let a=db.animals.find(x=>x.id===currentAnimal);if(!a)return;db.diets=db.diets||[];db.diets.push({id:uid(),farmId:a.farmId,animalId:a.id,startDate:dd1.value,endDate:dd2.value,name:dd3.value.trim(),kgPerDay:Number(dd4.value||0),milkStart:Number(dd5.value||0),weightStart:Number(dd6.value||0),conditionStart:dd7.value.trim(),composition:dd8.value.trim(),responsible:dd9.value.trim(),notes:dd10.value.trim()});save();closeModal();renderAnimal();show('animal')
 }
 function eventHTML(e){let a=db.animals.find(x=>x.id===e.animalId),f=db.farms.find(x=>x.id===e.farmId),name={milk:'🥛 Leche',repro:'🧬 Reproducción',health:'🩺 Salud'}[e.type]||'📌 Evento';let detail=e.type==='health'?`${e.diagnosis||e.notes||''}${e.treatment?' · Tratamiento: '+e.treatment:''}`:e.type==='repro'?(e.reproEvent||e.notes||''):((e.liters??'')!==''?e.liters+' L · '+(e.milking||''):(e.notes||''));return `<div class="event"><b>${name}</b><div class="small">${esc(e.date)} · ${esc(f?.name||'')} · ${esc(a?.tag||'')}${detail?' · '+esc(detail):''}</div></div>`}
 function renderActivity(){let es=db.events.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,40);activityList.innerHTML=es.length?es.map(eventHTML).join(''):'<div class="empty">Sin actividad.</div>'}
@@ -266,10 +280,10 @@ function saveEvent(e,type){
 }
 function closeModal(){modal.classList.remove('open')}
 function backupBlob(){return new Blob([JSON.stringify({...db,exportedAt:new Date().toISOString(),appVersion:APP_VERSION},null,2)],{type:'application/json'})}
-function backup(){let blob=backupBlob(),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rancho_Pecuario_V63_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
-async function shareBackup(){let blob=backupBlob(),name='Rancho_Pecuario_V63_'+today()+'.json';try{let file=new File([blob],name,{type:'application/json'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:'Respaldo Rancho Gestión Pecuaria',text:'Respaldo de datos para transferir a otro dispositivo.',files:[file]});return;}backup();alert('Este dispositivo no permite compartir archivos directamente. Se descargó el respaldo; puedes enviarlo por WhatsApp, Drive o correo.')}catch(err){if(err&&err.name==='AbortError')return;backup();alert('Se descargó el respaldo para que puedas enviarlo al otro dispositivo.')}}
-function restore(e){let f=e.target.files[0];if(!f)return;if(!confirm('Esto reemplazará los datos actuales de ESTE dispositivo por los del respaldo. ¿Continuar?')){e.target.value='';return;}let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.farms)||!Array.isArray(d.animals)||!Array.isArray(d.events))throw 0;db=d;db.version=61;db.campaigns=db.campaigns||[];db.transactions=db.transactions||[];save();currentFarm=null;currentAnimal=null;show('home');alert('Respaldo restaurado correctamente.')}catch{alert('Respaldo no válido.')}};r.readAsText(f);e.target.value=''}
-save();renderAll();show('home');if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js?v=62').catch(()=>{}));
+function backup(){let blob=backupBlob(),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rancho_Pecuario_V65_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+async function shareBackup(){let blob=backupBlob(),name='Rancho_Pecuario_V65_'+today()+'.json';try{let file=new File([blob],name,{type:'application/json'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:'Respaldo Rancho Gestión Pecuaria',text:'Respaldo de datos para transferir a otro dispositivo.',files:[file]});return;}backup();alert('Este dispositivo no permite compartir archivos directamente. Se descargó el respaldo; puedes enviarlo por WhatsApp, Drive o correo.')}catch(err){if(err&&err.name==='AbortError')return;backup();alert('Se descargó el respaldo para que puedas enviarlo al otro dispositivo.')}}
+function restore(e){let f=e.target.files[0];if(!f)return;if(!confirm('Esto reemplazará los datos actuales de ESTE dispositivo por los del respaldo. ¿Continuar?')){e.target.value='';return;}let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.farms)||!Array.isArray(d.animals)||!Array.isArray(d.events))throw 0;db=d;db.version=65;db.campaigns=db.campaigns||[];db.transactions=db.transactions||[];db.diets=db.diets||[];save();currentFarm=null;currentAnimal=null;show('home');alert('Respaldo restaurado correctamente.')}catch{alert('Respaldo no válido.')}};r.readAsText(f);e.target.value=''}
+save();renderAll();show('home');if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js?v=65').catch(()=>{}));
 </script>
 </body>
 </html>
