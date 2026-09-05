@@ -26,7 +26,7 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 </style>
 </head>
 <body>
-<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6.2 · Registro bovino, salud, producción y control del rancho</div></header>
+<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6.3 · Registro bovino, salud, producción y control del rancho</div></header>
 <main>
 <section id="home" class="view active">
   <div class="row between"><div><div class="title">Mis ranchos</div><div class="small">Administrador local</div></div><button class="btn primary" onclick="openFarm()">＋ Rancho</button></div>
@@ -71,8 +71,19 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 <section id="settings" class="view">
   <div class="title">Administración</div>
   <div class="section">Usuarios y permisos</div><div class="card"><b>👑 Administrador</b><p class="small">La V6 conserva la estructura multi-rancho. La sincronización multiusuario real se podrá conectar posteriormente a un backend con autenticación y permisos por rancho.</p></div>
-  <div class="section">Datos</div><div class="card row"><button class="btn primary" onclick="backup()">Descargar respaldo V6.2</button><button class="btn secondary" onclick="fileIn.click()">Restaurar</button><input id="fileIn" type="file" accept=".json" style="display:none" onchange="restore(event)"></div>
-  <div class="section">Migración</div><div class="card small">La V6 intenta conservar automáticamente los datos que ya existan en la V5 local del mismo dispositivo.</div>
+  <div class="section">Datos</div><div class="card row"><button class="btn primary" onclick="backup()">Descargar respaldo V6.3</button><button class="btn secondary" onclick="fileIn.click()">Restaurar</button><input id="fileIn" type="file" accept=".json" style="display:none" onchange="restore(event)"></div>
+  <div class="section">Transferencia entre dispositivos</div>
+  <div class="card">
+    <b>📱 Tablet ↔ 📱 Teléfono</b>
+    <p class="small">Esta versión permite mover una copia completa de tus datos entre dispositivos mediante un archivo JSON. No borra el dispositivo de origen.</p>
+    <div class="row">
+      <button class="btn primary" onclick="shareBackup()">📤 Compartir respaldo</button>
+      <button class="btn secondary" onclick="fileIn.click()">📥 Importar respaldo</button>
+    </div>
+    <p class="small" style="margin-top:8px">En el teléfono: recibe el archivo, abre la aplicación y usa “Importar respaldo”. La copia sustituye los datos actuales del teléfono por los del archivo.</p>
+  </div>
+  <div class="section">Sincronización en la nube</div><div class="card small">La sincronización automática en tiempo real entre teléfono y tablet requiere una base de datos en la nube con autenticación. La aplicación actual sigue siendo local para proteger tus datos y no inventa una conexión de nube.</div>
+  <div class="section">Migración</div><div class="card small">V6.3 conserva automáticamente los datos de V6.1/V6.2 en el mismo dispositivo.</div>
 </section>
 </main>
 
@@ -87,6 +98,7 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 
 <script>
 const V6KEY='rancho_v61_db';
+const APP_VERSION='6.3';
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random().toString(16).slice(2)}
 function today(){return new Date().toISOString().slice(0,10)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
@@ -253,8 +265,10 @@ function saveEvent(e,type){
   db.events.push(ev);save();closeModal();renderAnimal();show('animal')
 }
 function closeModal(){modal.classList.remove('open')}
-function backup(){let blob=new Blob([JSON.stringify({...db,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rancho_Pecuario_V62_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
-function restore(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.farms)||!Array.isArray(d.animals)||!Array.isArray(d.events))throw 0;db=d;db.version=61;db.campaigns=db.campaigns||[];db.transactions=db.transactions||[];save();currentFarm=null;currentAnimal=null;show('home');alert('Respaldo restaurado.')}catch{alert('Respaldo no válido.')}};r.readAsText(f)}
+function backupBlob(){return new Blob([JSON.stringify({...db,exportedAt:new Date().toISOString(),appVersion:APP_VERSION},null,2)],{type:'application/json'})}
+function backup(){let blob=backupBlob(),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rancho_Pecuario_V63_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+async function shareBackup(){let blob=backupBlob(),name='Rancho_Pecuario_V63_'+today()+'.json';try{let file=new File([blob],name,{type:'application/json'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:'Respaldo Rancho Gestión Pecuaria',text:'Respaldo de datos para transferir a otro dispositivo.',files:[file]});return;}backup();alert('Este dispositivo no permite compartir archivos directamente. Se descargó el respaldo; puedes enviarlo por WhatsApp, Drive o correo.')}catch(err){if(err&&err.name==='AbortError')return;backup();alert('Se descargó el respaldo para que puedas enviarlo al otro dispositivo.')}}
+function restore(e){let f=e.target.files[0];if(!f)return;if(!confirm('Esto reemplazará los datos actuales de ESTE dispositivo por los del respaldo. ¿Continuar?')){e.target.value='';return;}let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.farms)||!Array.isArray(d.animals)||!Array.isArray(d.events))throw 0;db=d;db.version=61;db.campaigns=db.campaigns||[];db.transactions=db.transactions||[];save();currentFarm=null;currentAnimal=null;show('home');alert('Respaldo restaurado correctamente.')}catch{alert('Respaldo no válido.')}};r.readAsText(f);e.target.value=''}
 save();renderAll();show('home');if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js?v=62').catch(()=>{}));
 </script>
 </body>
