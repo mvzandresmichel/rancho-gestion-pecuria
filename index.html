@@ -26,7 +26,7 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 </style>
 </head>
 <body>
-<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6.3 · Registro bovino, salud, producción y control del rancho</div></header>
+<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6.4 · Registro bovino, salud, producción y control del rancho</div></header>
 <main>
 <section id="home" class="view active">
   <div class="row between"><div><div class="title">Mis ranchos</div><div class="small">Administrador local</div></div><button class="btn primary" onclick="openFarm()">＋ Rancho</button></div>
@@ -71,7 +71,7 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 <section id="settings" class="view">
   <div class="title">Administración</div>
   <div class="section">Usuarios y permisos</div><div class="card"><b>👑 Administrador</b><p class="small">La V6 conserva la estructura multi-rancho. La sincronización multiusuario real se podrá conectar posteriormente a un backend con autenticación y permisos por rancho.</p></div>
-  <div class="section">Datos</div><div class="card row"><button class="btn primary" onclick="backup()">Descargar respaldo V6.3</button><button class="btn secondary" onclick="fileIn.click()">Restaurar</button><input id="fileIn" type="file" accept=".json" style="display:none" onchange="restore(event)"></div>
+  <div class="section">Datos</div><div class="card row"><button class="btn primary" onclick="backup()">Descargar respaldo V6.4</button><button class="btn secondary" onclick="fileIn.click()">Restaurar</button><input id="fileIn" type="file" accept=".json" style="display:none" onchange="restore(event)"></div>
   <div class="section">Transferencia entre dispositivos</div>
   <div class="card">
     <b>📱 Tablet ↔ 📱 Teléfono</b>
@@ -83,7 +83,7 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
     <p class="small" style="margin-top:8px">En el teléfono: recibe el archivo, abre la aplicación y usa “Importar respaldo”. La copia sustituye los datos actuales del teléfono por los del archivo.</p>
   </div>
   <div class="section">Sincronización en la nube</div><div class="card small">La sincronización automática en tiempo real entre teléfono y tablet requiere una base de datos en la nube con autenticación. La aplicación actual sigue siendo local para proteger tus datos y no inventa una conexión de nube.</div>
-  <div class="section">Migración</div><div class="card small">V6.3 conserva automáticamente los datos de V6.1/V6.2 en el mismo dispositivo.</div>
+  <div class="section">Migración</div><div class="card small">V6.4 conserva automáticamente los datos de V6.1/V6.2 en el mismo dispositivo.</div>
 </section>
 </main>
 
@@ -116,7 +116,7 @@ function loadDB(){
 let db=loadDB(),currentFarm=null,currentAnimal=null,reportTab='repro';
 function save(){localStorage.setItem(V6KEY,JSON.stringify(db))}
 function show(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));let m={home:'nHome',farm:'nFarm',animal:'nFarm',activity:'nActivity',reports:'nReports',settings:'nSettings'};if(m[id])document.getElementById(m[id]).classList.add('active');renderAll()}
-function renderAll(){renderHome();if(currentFarm)renderFarm();renderActivity();renderReports()}
+function renderAll(){renderHome();if(currentFarm)renderFarm();if(currentAnimal)renderAnimal();renderActivity();renderReports()}
 function farmAnimals(fid){return db.animals.filter(a=>a.farmId===fid)}
 function farmEvents(fid){return db.events.filter(e=>e.farmId===fid)}
 function farmCampaigns(fid){return (db.campaigns||[]).filter(c=>c.farmId===fid)}
