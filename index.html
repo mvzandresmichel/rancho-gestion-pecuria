@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#176b38">
 <link rel="manifest" href="manifest.json">
-<title>Rancho · Gestión Pecuaria V6.6</title>
+<title>Rancho · Gestión Pecuaria V6.7</title>
 <style>
 :root{--g:#176b38;--g2:#0d5229;--bg:#f3f7f3;--c:#fff;--t:#183024;--m:#68766d;--l:#dce6df;--r:#a73535;--a:#f4b942}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--t)}
@@ -26,7 +26,7 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 </style>
 </head>
 <body>
-<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6.6 · Registro bovino, salud, producción, dietas y control del rancho</div></header>
+<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6.7 · Registro bovino, salud, producción, dietas y control del rancho</div></header>
 <main>
 <section id="home" class="view active">
   <div class="row between"><div><div class="title">Mis ranchos</div><div class="small">Administrador local</div></div><button class="btn primary" onclick="openFarm()">＋ Rancho</button></div>
@@ -78,7 +78,7 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
     <div id="cloudStatus" class="small" style="margin:6px 0 10px">Comprobando conexión…</div>
     <div id="cloudLogin"></div>
   </div>
-  <div class="section">Datos</div><div class="card row"><button class="btn primary" onclick="backup()">Descargar respaldo V6.6</button><button class="btn secondary" onclick="fileIn.click()">Restaurar</button><input id="fileIn" type="file" accept=".json" style="display:none" onchange="restore(event)"></div>
+  <div class="section">Datos</div><div class="card row"><button class="btn primary" onclick="backup()">Descargar respaldo V6.7</button><button class="btn secondary" onclick="fileIn.click()">Restaurar</button><input id="fileIn" type="file" accept=".json" style="display:none" onchange="restore(event)"></div>
   <div class="section">Transferencia entre dispositivos</div>
   <div class="card">
     <b>📱 Tablet ↔ 📱 Teléfono</b>
@@ -89,12 +89,13 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
     </div>
     <p class="small" style="margin-top:8px">En el teléfono: recibe el archivo, abre la aplicación y usa “Importar respaldo”. La copia sustituye los datos actuales del teléfono por los del archivo.</p>
   </div>
-  <div class="section">Migración</div><div class="card small">V6.6 conserva los datos locales. Inicia sesión arriba y usa <b>Subir datos locales a la nube</b> una sola vez para migrar esta copia. Después, los cambios guardados se sincronizan automáticamente.</div>
-  <div class="section">Migración</div><div class="card small">V6.6 conserva automáticamente los datos de V6.1/V6.2 en el mismo dispositivo.</div>
+  <div class="section">Migración</div><div class="card small">V6.7 conserva los datos locales. Inicia sesión arriba y usa <b>Subir datos locales a la nube</b> una sola vez para migrar esta copia. Después, los cambios guardados se sincronizan automáticamente.</div>
+  <div class="section">Migración</div><div class="card small">V6.7 conserva automáticamente los datos de V6.1/V6.2 en el mismo dispositivo.</div>
 </section>
 </main>
 
 <div class="modal" id="modal"><div class="sheet"><div class="row between"><div class="title" id="modalTitle"></div><button class="btn secondary" onclick="closeModal()">Cerrar</button></div><div id="modalBody" style="margin-top:12px"></div></div></div>
+<div class="modal" id="resetModal" style="z-index:50"><div class="sheet"><div class="row between"><div class="title">🔑 Nueva contraseña</div><button class="btn secondary" onclick="closeResetModal()">Cerrar</button></div><p class="small" id="resetIntro" style="margin:10px 0">Escribe una contraseña nueva para tu cuenta de Rancho Gestión Pecuaria.</p><form onsubmit="finishPasswordReset(event)"><div class="field"><label>Nueva contraseña</label><input id="newPassword" type="password" minlength="8" required autocomplete="new-password"></div><div class="field"><label>Repite la contraseña</label><input id="newPassword2" type="password" minlength="8" required autocomplete="new-password"></div><button class="btn primary">Guardar nueva contraseña</button><div class="small" id="resetStatus"></div></form></div></div>
 <div class="bottom"><div class="nav">
 <button id="nHome" onclick="show('home')">🏠<br>Ranchos</button>
 <button id="nFarm" onclick="currentFarm?show('farm'):show('home')">🐄<br>Inventario</button>
@@ -110,7 +111,7 @@ const SUPABASE_KEY="sb_publishable_vNcIT6BmCqlTxL78Q4f6KA_Nkgqu_Y";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let cloudUser=null, cloudBusy=false, cloudTimer=null, realtimeChannel=null;
 const V6KEY='rancho_v61_db';
-const APP_VERSION='6.6';
+const APP_VERSION='6.7';
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random().toString(16).slice(2)}
 function today(){return new Date().toISOString().slice(0,10)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
@@ -163,6 +164,7 @@ function renderCloudCard(){
       <div class="field"><label>Contraseña</label><input id="cloudPassword" type="password" required autocomplete="current-password"></div>
       <button class="btn primary">🔐 Iniciar sesión</button>
     </form>
+    <button type="button" class="btn secondary" style="margin-top:9px;width:100%" onclick="requestPasswordReset()">🔑 ¿Olvidaste tu contraseña?</button>
     <div class="small" style="margin-top:8px">Usa el usuario que creaste en Supabase. No guardamos la contraseña en la aplicación.</div>`;
     setCloudStatus('No has iniciado sesión',false);
   }
@@ -174,6 +176,40 @@ async function cloudSignIn(e){
   if(error){setCloudStatus('No se pudo iniciar sesión: '+error.message,false);return;}
   cloudUser=data.user; renderCloudCard(); await startRealtime(); await downloadCloudToLocal(true);
 }
+
+function appRedirectUrl(){return new URL('./',window.location.href).href}
+async function requestPasswordReset(){
+  const email=(document.getElementById('cloudEmail')?.value||'').trim();
+  if(!email){alert('Escribe primero tu correo electrónico.');document.getElementById('cloudEmail')?.focus();return;}
+  setCloudStatus('Enviando recuperación de contraseña…');
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:appRedirectUrl()});
+  if(error){setCloudStatus('No se pudo enviar la recuperación: '+error.message,false);alert('Supabase no pudo enviar el correo. Revisa la configuración del proveedor de correo en Authentication.');return;}
+  setCloudStatus('Solicitud enviada. Revisa tu correo para restablecer la contraseña.');
+  alert('Solicitud enviada. Revisa tu correo, incluida la carpeta Spam.');
+}
+function openResetModal(){
+  const m=document.getElementById('resetModal'); if(!m)return;
+  document.getElementById('newPassword').value=''; document.getElementById('newPassword2').value=''; document.getElementById('resetStatus').textContent='';
+  m.classList.add('open');
+}
+function closeResetModal(){document.getElementById('resetModal')?.classList.remove('open')}
+async function finishPasswordReset(e){
+  e.preventDefault();
+  const p=document.getElementById('newPassword').value, p2=document.getElementById('newPassword2').value, st=document.getElementById('resetStatus');
+  if(p!==p2){st.textContent='Las contraseñas no coinciden.';st.style.color='var(--r)';return;}
+  if(p.length<8){st.textContent='La contraseña debe tener al menos 8 caracteres.';st.style.color='var(--r)';return;}
+  st.textContent='Guardando…'; st.style.color='var(--m)';
+  const {error}=await sb.auth.updateUser({password:p});
+  if(error){st.textContent='No se pudo cambiar la contraseña: '+error.message;st.style.color='var(--r)';return;}
+  st.textContent='Contraseña actualizada correctamente.';st.style.color='var(--g)';
+  alert('Contraseña actualizada correctamente. Ya puedes iniciar sesión con tu nueva contraseña.');
+  closeResetModal();
+  await sb.auth.signOut();
+  cloudUser=null; renderCloudCard();
+}
+sb.auth.onAuthStateChange((event,session)=>{
+  if(event==='PASSWORD_RECOVERY'){setTimeout(openResetModal,0);}
+});
 async function cloudSignOut(){
   await sb.auth.signOut();
   cloudUser=null;
@@ -470,10 +506,10 @@ function saveEvent(e,type){
 }
 function closeModal(){modal.classList.remove('open')}
 function backupBlob(){return new Blob([JSON.stringify({...db,exportedAt:new Date().toISOString(),appVersion:APP_VERSION},null,2)],{type:'application/json'})}
-function backup(){let blob=backupBlob(),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rancho_Pecuario_V66_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
-async function shareBackup(){let blob=backupBlob(),name='Rancho_Pecuario_V66_'+today()+'.json';try{let file=new File([blob],name,{type:'application/json'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:'Respaldo Rancho Gestión Pecuaria',text:'Respaldo de datos para transferir a otro dispositivo.',files:[file]});return;}backup();alert('Este dispositivo no permite compartir archivos directamente. Se descargó el respaldo; puedes enviarlo por WhatsApp, Drive o correo.')}catch(err){if(err&&err.name==='AbortError')return;backup();alert('Se descargó el respaldo para que puedas enviarlo al otro dispositivo.')}}
+function backup(){let blob=backupBlob(),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rancho_Pecuario_V67_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+async function shareBackup(){let blob=backupBlob(),name='Rancho_Pecuario_V67_'+today()+'.json';try{let file=new File([blob],name,{type:'application/json'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:'Respaldo Rancho Gestión Pecuaria',text:'Respaldo de datos para transferir a otro dispositivo.',files:[file]});return;}backup();alert('Este dispositivo no permite compartir archivos directamente. Se descargó el respaldo; puedes enviarlo por WhatsApp, Drive o correo.')}catch(err){if(err&&err.name==='AbortError')return;backup();alert('Se descargó el respaldo para que puedas enviarlo al otro dispositivo.')}}
 function restore(e){let f=e.target.files[0];if(!f)return;if(!confirm('Esto reemplazará los datos actuales de ESTE dispositivo por los del respaldo. ¿Continuar?')){e.target.value='';return;}let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.farms)||!Array.isArray(d.animals)||!Array.isArray(d.events))throw 0;db=d;db.version=65;db.campaigns=db.campaigns||[];db.transactions=db.transactions||[];db.diets=db.diets||[];save();currentFarm=null;currentAnimal=null;show('home');alert('Respaldo restaurado correctamente.')}catch{alert('Respaldo no válido.')}};r.readAsText(f);e.target.value=''}
-save();renderAll();show('home');initCloud();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js?v=66').catch(()=>{}));
+save();renderAll();show('home');initCloud();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js?v=67').catch(()=>{}));
 </script>
 </body>
 </html>

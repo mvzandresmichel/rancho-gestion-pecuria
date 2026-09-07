@@ -1,4 +1,4 @@
-Rancho Gestión Pecuaria V6.6 — Nube
+Rancho Gestión Pecuaria V6.7 — Nube
 - Conexión Supabase configurada con Project URL y Publishable key.
 - Autenticación por correo/contraseña.
 - Migración local -> nube mediante "Subir datos locales a la nube".
