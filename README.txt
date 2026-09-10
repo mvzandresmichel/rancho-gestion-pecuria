@@ -1,4 +1,4 @@
-Rancho Gestión Pecuaria V6.8 — Nube
+Rancho Gestión Pecuaria V6.11 — Nube
 - Conexión Supabase configurada con Project URL y Publishable key.
 - Autenticación por correo/contraseña.
 - Migración local -> nube mediante "Subir datos locales a la nube".
@@ -8,7 +8,7 @@ Rancho Gestión Pecuaria V6.8 — Nube
 - Las fotografías permanecen locales durante esta primera migración; no se suben como base64 a Postgres.
 
 
-V6.8 - ALERTAS REPRODUCTIVAS Y GOOGLE SHEETS
+V6.11 - ALERTAS REPRODUCTIVAS Y GOOGLE SHEETS
 
 Nuevas funciones:
 - Alertas automáticas a los 60 y 80 días postparto, calculadas desde el último evento reproductivo "Parto".
@@ -68,3 +68,9 @@ VERSIÓN 6.9 - ALERTAS SANITARIAS POR ESPECIE, CATEGORÍA Y GRUPO
 - Las alertas pueden marcarse individualmente como atendidas; al atenderlas se calcula la siguiente fecha según el intervalo configurado.
 - Las campañas sin filtros siguen funcionando como campañas generales del hato.
 - Los datos nuevos se incluyen en la sincronización con Google Sheets.
+
+V6.11 - EVENTOS DE SERVICIO / INSEMINACIÓN
+- Al seleccionar Servicio se muestran Tipo de servicio, código/identificación del toro y código de la pajilla.
+- La próxima revisión de celo se calcula automáticamente a 21 días del servicio.
+- La revisión de celo genera una alerta reproductiva y notificación cuando corresponde.
+- Los datos se conservan en el historial reproductivo y se mantienen compatibles con la sincronización existente.

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#176b38">
 <link rel="manifest" href="manifest.json">
-<title>Rancho · Gestión Pecuaria V6.8</title>
+<title>Rancho · Gestión Pecuaria V6.11</title>
 <style>
 :root{--g:#176b38;--g2:#0d5229;--bg:#f3f7f3;--c:#fff;--t:#183024;--m:#68766d;--l:#dce6df;--r:#a73535;--a:#f4b942}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--t)}
@@ -26,7 +26,7 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 </style>
 </head>
 <body>
-<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6.8 · Registro bovino, salud, producción, dietas y control del rancho</div></header>
+<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6.11 · Registro bovino, salud, producción, dietas y control del rancho</div></header>
 <main>
 <section id="home" class="view active">
   <div class="row between"><div><div class="title">Mis ranchos</div><div class="small">Administrador local</div></div><button class="btn primary" onclick="openFarm()">＋ Rancho</button></div>
@@ -131,16 +131,16 @@ const SUPABASE_KEY="sb_publishable_vNcIT6BmCqlTxL78Q4f6KA_Nkgqu_Y";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let cloudUser=null, cloudBusy=false, cloudTimer=null, realtimeChannel=null;
 const V6KEY='rancho_v61_db';
-const APP_VERSION='6.9';
+const APP_VERSION='6.11';
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random().toString(16).slice(2)}
 function today(){return new Date().toISOString().slice(0,10)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function monthLabel(k){let [y,m]=k.split('-');return new Date(Number(y),Number(m)-1,1).toLocaleDateString('es-MX',{month:'short',year:'2-digit'}).replace('.','')}
 function blankDB(){return {version:69,farms:[],animals:[],events:[],campaigns:[],transactions:[],diets:[],reproAlerts:[],healthAlerts:[],sheetsSync:{url:'',enabled:false}}}
 function loadDB(){
-  try{let d=JSON.parse(localStorage.getItem(V6KEY)||'null');if(d&&Array.isArray(d.farms)){d.campaigns=d.campaigns||[];d.transactions=d.transactions||[];d.diets=d.diets||[];d.reproAlerts=d.reproAlerts||[];d.sheetsSync=d.sheetsSync||{url:'',enabled:false};d.animals=(d.animals||[]).map(a=>({...a,species:a.species||'Bovino',category:a.category||'',group:a.group||a.lot||''}));d.campaigns=(d.campaigns||[]).map(c=>({...c,targetSpecies:c.targetSpecies||'',targetCategory:c.targetCategory||'',targetGroup:c.targetGroup||'',intervalValue:c.intervalValue||c.intervalMonths||6,intervalUnit:c.intervalUnit||'meses'}));d.version=69;return d}}catch(e){}
+  try{let d=JSON.parse(localStorage.getItem(V6KEY)||'null');if(d&&Array.isArray(d.farms)){d.campaigns=d.campaigns||[];d.transactions=d.transactions||[];d.diets=d.diets||[];d.reproAlerts=d.reproAlerts||[];d.sheetsSync=d.sheetsSync||{url:'',enabled:false};d.animals=(d.animals||[]).map(a=>({...a,species:a.species||'Bovino',category:a.category||'',group:a.group||a.lot||''}));d.campaigns=(d.campaigns||[]).map(c=>({...c,targetSpecies:c.targetSpecies||'',targetCategory:c.targetCategory||'',targetGroup:c.targetGroup||'',intervalValue:c.intervalValue||c.intervalMonths||6,intervalUnit:c.intervalUnit||'meses'}));d.version=71;return d}}catch(e){}
   try{let old=JSON.parse(localStorage.getItem('rancho_v6_db')||localStorage.getItem('rancho_v5_db')||'null');if(old&&Array.isArray(old.farms)){
-    old.version=69;old.campaigns=old.campaigns||[];old.transactions=old.transactions||[];old.diets=old.diets||[];old.reproAlerts=old.reproAlerts||[];old.sheetsSync=old.sheetsSync||{url:'',enabled:false};old.animals=(old.animals||[]).map(a=>({...a,name:a.name||'',internalId:a.internalId||'',birthDate:a.birthDate||'',entryDate:a.entryDate||'',origin:a.origin||'',condition:a.condition||''}));
+    old.version=71;old.campaigns=old.campaigns||[];old.transactions=old.transactions||[];old.diets=old.diets||[];old.reproAlerts=old.reproAlerts||[];old.sheetsSync=old.sheetsSync||{url:'',enabled:false};old.animals=(old.animals||[]).map(a=>({...a,name:a.name||'',internalId:a.internalId||'',birthDate:a.birthDate||'',entryDate:a.entryDate||'',origin:a.origin||'',condition:a.condition||''}));
     old.animals=(old.animals||[]).map(a=>({...a,species:a.species||'Bovino',category:a.category||'',group:a.group||a.lot||''}));old.campaigns=(old.campaigns||[]).map(c=>({...c,targetSpecies:c.targetSpecies||'',targetCategory:c.targetCategory||'',targetGroup:c.targetGroup||'',intervalValue:c.intervalValue||c.intervalMonths||6,intervalUnit:c.intervalUnit||'meses'}));old.events=(old.events||[]).map(e=>({...e,diagnosis:e.diagnosis||'',treatment:e.treatment||'',attended:e.attended??(e.type==='health'),reproEvent:e.reproEvent||''}));
     return old;
   }}catch(e){}
@@ -168,11 +168,14 @@ function ensureReproAlerts(){
   db.reproAlerts=db.reproAlerts||[];
   (db.animals||[]).forEach(a=>{
     if(a.sex!=='Hembra')return;
-    const p=latestCalving(a.id); if(!p)return;
-    [60,80].forEach(day=>{
+    const p=latestCalving(a.id); if(p)[60,80].forEach(day=>{
       const due=addDaysISO(p.date,day), id=`${a.id}|${p.id}|${day}`;
-      if(!db.reproAlerts.some(x=>x.id===id))
-        db.reproAlerts.push({id,farmId:a.farmId,animalId:a.id,partoEventId:p.id,day,dueDate:due,attended:false,attendedAt:''});
+      if(!db.reproAlerts.some(x=>x.id===id)) db.reproAlerts.push({id,farmId:a.farmId,animalId:a.id,partoEventId:p.id,day,dueDate:due,attended:false,attendedAt:''});
+    });
+    // Revisión de celo a los 21 días después de cada servicio.
+    db.events.filter(e=>e.animalId===a.id&&e.type==='repro'&&e.reproEvent==='Servicio'&&e.nextReviewDate).forEach(e=>{
+      const due=e.nextReviewDate, id=`${a.id}|service|${e.id}|21`;
+      if(!db.reproAlerts.some(x=>x.id===id)) db.reproAlerts.push({id,farmId:a.farmId,animalId:a.id,serviceEventId:e.id,day:21,dueDate:due,attended:false,attendedAt:''});
     });
   });
 }
@@ -180,7 +183,7 @@ function reproAlertsForFarm(fid){
   ensureReproAlerts();
   return db.reproAlerts.filter(x=>x.farmId===fid).sort((a,b)=>(a.dueDate||'').localeCompare(b.dueDate||''));
 }
-function alertLabel(x){return x.day===60?'Revisión reproductiva 60 DPP':'Atención reproductiva 80 DPP'}
+function alertLabel(x){return x.day===21?'Revisión de celo 21 días':x.day===60?'Revisión reproductiva 60 DPP':'Atención reproductiva 80 DPP'}
 function markReproAlert(id){
   ensureReproAlerts();
   const x=db.reproAlerts.find(a=>a.id===id); if(!x)return;
@@ -397,7 +400,11 @@ function rowAnimal(a){
   return {id:a.id,farm_id:a.farmId,owner_id:cloudUser.id,official_tag:a.tag||null,internal_number:a.internalId||null,name:a.name||null,species:a.species||'Bovino',breed:a.breed||null,sex:a.sex||null,lot:a.lot||null,birth_date:a.birthDate||null,entry_date:a.entryDate||null,origin:a.origin||null,weight:a.weight!==''&&a.weight!=null?Number(a.weight):null,body_condition:a.condition!==''&&a.condition!=null?Number(a.condition):null,sire:a.sire||null,dam:a.dam||null,reproductive_status:a.repro||null,status:(a.status||'active').toLowerCase()==='active'?'active':a.status||'active',observations:a.observations||null};
 }
 function rowEvent(e){
-  return {id:e.id,farm_id:e.farmId,animal_id:e.animalId,owner_id:cloudUser.id,event_type:e.type||'other',event_date:e.date||today(),diagnosis:e.diagnosis||null,treatment:e.treatment||null,result:e.result||null,service_number:e.serviceNumber||null,bull_or_semen:e.bullOrSemen||null,pregnancy_result:e.pregnancyResult||null,milk_liters:e.liters!=null?Number(e.liters):null,weight:e.weight!=null&&e.weight!==''?Number(e.weight):null,observations:e.notes||e.observations||null};
+  let bull=e.bullCode||e.bullOrSemen||'';
+  let straw=e.semenCode||'';
+  let bullOrSemen=[bull?`Toro: ${bull}`:'',straw?`Pajilla: ${straw}`:''].filter(Boolean).join(' · ')||null;
+  let preg=e.pregnancyResult|| (e.nextReviewDate?`Próxima revisión: ${e.nextReviewDate}`:null);
+  return {id:e.id,farm_id:e.farmId,animal_id:e.animalId,owner_id:cloudUser.id,event_type:e.type||'other',event_date:e.date||today(),diagnosis:e.diagnosis||null,treatment:e.treatment||null,result:e.result||null,service_number:e.serviceNumber||e.serviceType||null,bull_or_semen:bullOrSemen,pregnancy_result:preg,milk_liters:e.liters!=null?Number(e.liters):null,weight:e.weight!=null&&e.weight!==''?Number(e.weight):null,observations:e.notes||e.observations||null};
 }
 function rowCampaign(c){
   return {id:c.id,farm_id:c.farmId,owner_id:cloudUser.id,campaign_type:c.kind||'otro',program:c.name||null,product:c.product||null,application_date:c.date||today(),interval_months:c.intervalMonths||null,scheduled_count:c.planned||0,applied_count:c.treated||0,batch:c.batch||null,responsible:c.responsible||null,observations:c.notes||null,next_date:c.nextDate||null};
@@ -447,7 +454,14 @@ async function downloadCloudToLocal(silent=false){
     }
     const farms=got.farms.map(f=>({id:f.id,name:f.name||'',location:f.locality||'',manager:f.manager||'',production:'',area:f.surface_ha??'',paddocks:f.paddocks??'',lat:f.latitude??'',lng:f.longitude??'',locationUpdated:f.latitude!=null&&f.longitude!=null?today():'',notes:f.observations||''}));
     const animals=got.animals.map(a=>({id:a.id,farmId:a.farm_id,tag:a.official_tag||'',internalId:a.internal_number||'',name:a.name||'',sex:a.sex||'Hembra',breed:a.breed||'',lot:a.lot||'',weight:a.weight??'',condition:a.body_condition??'',birthDate:a.birth_date||'',entryDate:a.entry_date||'',sire:a.sire||'',dam:a.dam||'',origin:a.origin||'',repro:a.reproductive_status||'No aplica',status:(a.status||'active').toLowerCase()==='active'?'active':a.status,photo:'',observations:a.observations||''}));
-    const events=got.events.map(e=>({id:e.id,farmId:e.farm_id,animalId:e.animal_id,type:e.event_type,date:e.event_date,diagnosis:e.diagnosis||'',treatment:e.treatment||'',result:e.result||'',liters:e.milk_liters??'',weight:e.weight??'',notes:e.observations||'',reproEvent:e.event_type==='repro'?e.observations||'':''}));
+    const events=got.events.map(e=>{
+      let bullCode='',semenCode='',nextReviewDate='',serviceType=e.service_number||'';
+      const bs=String(e.bull_or_semen||'');
+      const bm=bs.match(/Toro:\s*([^·]+)/i); if(bm)bullCode=bm[1].trim();
+      const sm=bs.match(/Pajilla:\s*(.+)$/i); if(sm)semenCode=sm[1].trim();
+      const rm=String(e.pregnancy_result||'').match(/Próxima revisión:\s*(\d{4}-\d{2}-\d{2})/i); if(rm)nextReviewDate=rm[1];
+      return {id:e.id,farmId:e.farm_id,animalId:e.animal_id,type:e.event_type,date:e.event_date,diagnosis:e.diagnosis||'',treatment:e.treatment||'',result:e.result||'',liters:e.milk_liters??'',weight:e.weight??'',notes:e.observations||'',reproEvent:e.event_type==='repro'?e.observations||'':'',serviceType,bullCode,semenCode,nextReviewDate};
+    });
     const campaigns=got.campaigns.map(c=>({id:c.id,farmId:c.farm_id,kind:c.campaign_type,name:c.program||'',date:c.application_date,intervalMonths:c.interval_months||0,nextDate:c.next_date||'',planned:c.scheduled_count||0,treated:c.applied_count||0,coverage:`${c.applied_count||0}/${c.scheduled_count||0}`,batch:c.batch||'',responsible:c.responsible||'',notes:c.observations||''}));
     const diets=got.diets.map(d=>({id:d.id,farmId:d.farm_id,animalId:d.animal_id,startDate:d.start_date,endDate:d.end_date||'',name:d.diet_name||'',kgPerAnimalDay:d.kg_per_animal_day??'',milkAtStart:d.milk_at_start??'',weightAtStart:d.weight_at_start??'',bodyCondition:d.body_condition??'',ingredients:d.ingredients||'',responsible:d.responsible||'',notes:d.notes||''}));
     const transactions=got.transactions.map(t=>({id:t.id,farmId:t.farm_id,animalId:t.animal_id,type:t.transaction_type,date:t.transaction_date,weight:t.weight??'',pricePerKg:t.price_per_kg??'',totalPrice:t.total_price??'',reason:t.reason||'',buyer:t.buyer||'',destination:t.destination||'',cause:t.cause||'',diagnosis:t.diagnosis||'',necropsy:t.necropsy||'',previousTreatment:t.previous_treatment||'',responsible:t.responsible||'',notes:t.observations||''}));
@@ -583,7 +597,7 @@ function openDiet(){
 }
 function saveDiet(e){e.preventDefault();let a=db.animals.find(x=>x.id===currentAnimal);if(!a)return;db.diets=db.diets||[];db.diets.push({id:uid(),farmId:a.farmId,animalId:a.id,startDate:dd1.value,endDate:dd2.value,name:dd3.value.trim(),kgPerDay:Number(dd4.value||0),milkStart:Number(dd5.value||0),weightStart:Number(dd6.value||0),conditionStart:dd7.value.trim(),composition:dd8.value.trim(),responsible:dd9.value.trim(),notes:dd10.value.trim()});save();closeModal();renderAnimal();show('animal')
 }
-function eventHTML(e){let a=db.animals.find(x=>x.id===e.animalId),f=db.farms.find(x=>x.id===e.farmId),name={milk:'🥛 Leche',repro:'🧬 Reproducción',health:'🩺 Salud'}[e.type]||'📌 Evento';let detail=e.type==='health'?`${e.diagnosis||e.notes||''}${e.treatment?' · Tratamiento: '+e.treatment:''}`:e.type==='repro'?(e.reproEvent||e.notes||''):((e.liters??'')!==''?e.liters+' L · '+(e.milking||''):(e.notes||''));return `<div class="event"><b>${name}</b><div class="small">${esc(e.date)} · ${esc(f?.name||'')} · ${esc(a?.tag||'')}${detail?' · '+esc(detail):''}</div></div>`}
+function eventHTML(e){let a=db.animals.find(x=>x.id===e.animalId),f=db.farms.find(x=>x.id===e.farmId),name={milk:'🥛 Leche',repro:'🧬 Reproducción',health:'🩺 Salud'}[e.type]||'📌 Evento';let detail=e.type==='health'?`${e.diagnosis||e.notes||''}${e.treatment?' · Tratamiento: '+e.treatment:''}`:e.type==='repro'?(e.reproEvent==='Servicio'?`${e.serviceType||'Servicio'}${e.bullCode?' · Toro: '+e.bullCode:''}${e.semenCode?' · Pajilla: '+e.semenCode:''}${e.nextReviewDate?' · Revisión: '+e.nextReviewDate:''}${e.notes?' · '+e.notes:''}`:(e.reproEvent||e.notes||'')):((e.liters??'')!==''?e.liters+' L · '+(e.milking||''):(e.notes||''));return `<div class="event"><b>${name}</b><div class="small">${esc(e.date)} · ${esc(f?.name||'')} · ${esc(a?.tag||'')}${detail?' · '+esc(detail):''}</div></div>`}
 function renderActivity(){let es=db.events.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,40);activityList.innerHTML=es.length?es.map(eventHTML).join(''):'<div class="empty">Sin actividad.</div>'}
 
 function setReportTab(t){reportTab=t;document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)).classList.add('active');renderReports()}
@@ -687,22 +701,33 @@ async function saveAnimal(e,id){
 }
 function openEvent(type){
   let a=db.animals.find(x=>x.id===currentAnimal);if(!a)return;modalTitle.textContent={milk:'Producción de leche',repro:'Evento reproductivo',health:'Atención sanitaria'}[type];
-  let fields=type==='milk'?`<div class="field"><label>Litros *</label><input id="ee2" type="number" step=".1" min="0" required></div><div class="field"><label>Ordeña</label><select id="ee3"><option>Mañana</option><option>Tarde</option><option>Única</option></select></div>`:type==='repro'?`<div class="field"><label>Evento</label><select id="ee2"><option>Servicio</option><option>Diagnóstico positivo</option><option>Diagnóstico negativo</option><option>Parto</option><option>Aborto</option><option>Secado</option><option>Revisión reproductiva</option></select></div><div class="field"><label>Observaciones</label><input id="ee3"></div>`:`<div class="field"><label>Diagnóstico / enfermedad *</label><input id="ee2" required placeholder="Ej. mastitis, metritis, neumonía..."></div><div class="field"><label>Tratamiento / procedimiento</label><input id="ee3" placeholder="Medicamento, manejo, cirugía, etc."></div><div class="field"><label>Resultado / observaciones</label><textarea id="ee4" rows="2"></textarea></div>`;
-  modalBody.innerHTML=`<form onsubmit="saveEvent(event,'${type}')"><div class="field"><label>Animal</label><input value="${esc(a.name||'Sin nombre')} · Arete ${esc(a.tag)}" disabled></div><div class="field"><label>Fecha</label><input id="ee1" type="date" required value="${today()}"></div>${fields}<button class="btn primary">Guardar registro</button></form>`;modal.classList.add('open')
+  let fields=type==='milk'?`<div class="field"><label>Litros *</label><input id="ee2" type="number" step=".1" min="0" required></div><div class="field"><label>Ordeña</label><select id="ee3"><option>Mañana</option><option>Tarde</option><option>Única</option></select></div>`:type==='repro'?`<div class="field"><label>Evento</label><select id="ee2" onchange="toggleServiceFields()"><option>Servicio</option><option>Diagnóstico positivo</option><option>Diagnóstico negativo</option><option>Parto</option><option>Aborto</option><option>Secado</option><option>Revisión reproductiva</option></select></div><div id="serviceFields"><div class="field"><label>Tipo de servicio</label><select id="eeServiceType"><option>Inseminación artificial (IA)</option><option>Inseminación a tiempo fijo (IATF)</option><option>Monta natural</option></select></div><div class="grid"><div class="field"><label>Código / identificación del toro</label><input id="eeBullCode" placeholder="Ej. H12345"></div><div class="field"><label>Código de la pajilla</label><input id="eeSemenCode" placeholder="Ej. 24MX-4587"></div></div><div class="field"><label>Próxima revisión de celo</label><input id="eeNextReview" type="date" readonly><div class="small">Se calcula automáticamente a 21 días después del servicio.</div></div></div><div class="field"><label>Observaciones</label><textarea id="ee3" rows="2"></textarea></div>`:`<div class="field"><label>Diagnóstico / enfermedad *</label><input id="ee2" required placeholder="Ej. mastitis, metritis, neumonía..."></div><div class="field"><label>Tratamiento / procedimiento</label><input id="ee3" placeholder="Medicamento, manejo, cirugía, etc."></div><div class="field"><label>Resultado / observaciones</label><textarea id="ee4" rows="2"></textarea></div>`;
+  modalBody.innerHTML=`<form onsubmit="saveEvent(event,'${type}')"><div class="field"><label>Animal</label><input value="${esc(a.name||'Sin nombre')} · Arete ${esc(a.tag)}" disabled></div><div class="field"><label>Fecha</label><input id="ee1" type="date" required value="${today()}" onchange="updateServiceReviewDate()"></div>${fields}<button class="btn primary">Guardar registro</button></form>`;modal.classList.add('open');if(type==='repro'){toggleServiceFields();updateServiceReviewDate()}
 }
+function toggleServiceFields(){const service=document.getElementById('ee2')?.value==='Servicio';const box=document.getElementById('serviceFields');if(box)box.style.display=service?'block':'none';if(service)updateServiceReviewDate()}
+function updateServiceReviewDate(){const d=document.getElementById('ee1'),r=document.getElementById('eeNextReview');if(d&&r&&d.value)r.value=addDaysISO(d.value,21)}
 function saveEvent(e,type){
   e.preventDefault();let a=db.animals.find(x=>x.id===currentAnimal),ev={id:uid(),farmId:a.farmId,animalId:a.id,type,date:ee1.value};
   if(type==='milk'){ev.liters=Number(ee2.value);ev.milking=ee3.value}
-  if(type==='repro'){ev.reproEvent=ee2.value;ev.notes=ee3.value;if(ee2.value==='Diagnóstico positivo')a.repro='Gestante';if(ee2.value==='Diagnóstico negativo')a.repro='Vacía';if(ee2.value==='Parto')a.repro='Parida reciente';if(ee2.value==='Secado')a.repro='Seca'}
+  if(type==='repro'){
+    ev.reproEvent=ee2.value;ev.notes=ee3.value.trim();
+    if(ee2.value==='Servicio'){
+      ev.serviceType=document.getElementById('eeServiceType')?.value||'Inseminación artificial (IA)';
+      ev.bullCode=document.getElementById('eeBullCode')?.value.trim()||'';
+      ev.semenCode=document.getElementById('eeSemenCode')?.value.trim()||'';
+      ev.nextReviewDate=document.getElementById('eeNextReview')?.value||addDaysISO(ev.date,21);
+    }
+    if(ee2.value==='Diagnóstico positivo')a.repro='Gestante';if(ee2.value==='Diagnóstico negativo')a.repro='Vacía';if(ee2.value==='Parto')a.repro='Parida reciente';if(ee2.value==='Secado')a.repro='Seca'
+  }
   if(type==='health'){ev.diagnosis=ee2.value.trim();ev.treatment=ee3.value.trim();ev.notes=ee4.value.trim();ev.attended=true}
-  db.events.push(ev);save();closeModal();renderAnimal();show('animal')
+  db.events.push(ev);ensureReproAlerts();save();closeModal();renderAnimal();show('animal')
 }
 function closeModal(){modal.classList.remove('open')}
 function backupBlob(){return new Blob([JSON.stringify({...db,exportedAt:new Date().toISOString(),appVersion:APP_VERSION},null,2)],{type:'application/json'})}
-function backup(){let blob=backupBlob(),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rancho_Pecuario_V67_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
-async function shareBackup(){let blob=backupBlob(),name='Rancho_Pecuario_V67_'+today()+'.json';try{let file=new File([blob],name,{type:'application/json'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:'Respaldo Rancho Gestión Pecuaria',text:'Respaldo de datos para transferir a otro dispositivo.',files:[file]});return;}backup();alert('Este dispositivo no permite compartir archivos directamente. Se descargó el respaldo; puedes enviarlo por WhatsApp, Drive o correo.')}catch(err){if(err&&err.name==='AbortError')return;backup();alert('Se descargó el respaldo para que puedas enviarlo al otro dispositivo.')}}
-function restore(e){let f=e.target.files[0];if(!f)return;if(!confirm('Esto reemplazará los datos actuales de ESTE dispositivo por los del respaldo. ¿Continuar?')){e.target.value='';return;}let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.farms)||!Array.isArray(d.animals)||!Array.isArray(d.events))throw 0;db=d;db.version=68;db.reproAlerts=db.reproAlerts||[];db.healthAlerts=db.healthAlerts||[];db.sheetsSync=db.sheetsSync||{url:'',enabled:false};db.campaigns=db.campaigns||[];db.transactions=db.transactions||[];db.diets=db.diets||[];save();currentFarm=null;currentAnimal=null;show('home');alert('Respaldo restaurado correctamente.')}catch{alert('Respaldo no válido.')}};r.readAsText(f);e.target.value=''}
-ensureReproAlerts();startReproAlertEngine();save();renderAll();show('home');initCloud();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js?v=67').catch(()=>{}));
+function backup(){let blob=backupBlob(),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rancho_Pecuario_V611_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+async function shareBackup(){let blob=backupBlob(),name='Rancho_Pecuario_V611_'+today()+'.json';try{let file=new File([blob],name,{type:'application/json'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:'Respaldo Rancho Gestión Pecuaria',text:'Respaldo de datos para transferir a otro dispositivo.',files:[file]});return;}backup();alert('Este dispositivo no permite compartir archivos directamente. Se descargó el respaldo; puedes enviarlo por WhatsApp, Drive o correo.')}catch(err){if(err&&err.name==='AbortError')return;backup();alert('Se descargó el respaldo para que puedas enviarlo al otro dispositivo.')}}
+function restore(e){let f=e.target.files[0];if(!f)return;if(!confirm('Esto reemplazará los datos actuales de ESTE dispositivo por los del respaldo. ¿Continuar?')){e.target.value='';return;}let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.farms)||!Array.isArray(d.animals)||!Array.isArray(d.events))throw 0;db=d;db.version=71;db.reproAlerts=db.reproAlerts||[];db.healthAlerts=db.healthAlerts||[];db.sheetsSync=db.sheetsSync||{url:'',enabled:false};db.campaigns=db.campaigns||[];db.transactions=db.transactions||[];db.diets=db.diets||[];save();currentFarm=null;currentAnimal=null;show('home');alert('Respaldo restaurado correctamente.')}catch{alert('Respaldo no válido.')}};r.readAsText(f);e.target.value=''}
+ensureReproAlerts();startReproAlertEngine();save();renderAll();show('home');initCloud();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js?v=71').catch(()=>{}));
 </script>
 </body>
 </html>
