@@ -1,0 +1,67 @@
+RANCHO · GESTIÓN PECUARIA V6.12
+CONFIGURACIÓN DE SINCRONIZACIÓN CON GOOGLE SHEETS
+
+1. En Google Drive crea una hoja de cálculo nueva.
+   Nombre sugerido: Rancho_Gestion_Pecuaria
+
+2. Copia el ID de la hoja.
+   Es la parte de la dirección que aparece entre /d/ y /edit.
+
+3. En la hoja abre: Extensiones > Apps Script.
+
+4. Borra el código que aparezca y pega el contenido del archivo:
+   Google_Apps_Script_Rancho_V6_12.gs
+
+5. Sustituye:
+   PEGA_AQUI_EL_ID_DE_TU_GOOGLE_SHEET
+   por el ID real de tu hoja.
+
+6. Guarda el proyecto.
+
+7. Ejecuta la función test una vez.
+   Google pedirá autorización. Acepta los permisos para que el script pueda escribir en la hoja.
+
+8. En Apps Script selecciona:
+   Implementar > Nueva implementación > Aplicación web.
+
+9. Configura:
+   Ejecutar como: Tú mismo
+   Quién tiene acceso: Cualquier persona con el enlace
+
+10. Pulsa Implementar y copia la URL de la aplicación web.
+
+11. Abre Rancho · Gestión Pecuaria V6.12.
+    Ve a:
+    Administración > Google Sheets · sincronización
+
+12. Pega la URL del Web App y pulsa:
+    Guardar y activar sincronización
+
+13. Pulsa:
+    Sincronizar ahora
+
+14. Regresa a Google Sheets. Deben aparecer las hojas:
+    Ranchos
+    Animales
+    Eventos
+    Campañas
+    Ventas
+    Dietas
+    Alertas_Repro
+    Alertas_Salud
+    Resumen_Animales
+    Control_Sync
+
+IMPORTANTE
+- La sincronización actual es APP -> GOOGLE SHEETS.
+- No edites manualmente los registros esperando que esos cambios regresen a la app.
+- La app conserva sus datos localmente y además puede sincronizarlos con Supabase.
+- Google Sheets funciona como espejo, consulta y análisis.
+- El archivo Excel .xlsx puede seguir utilizándose como respaldo.
+
+PRUEBA RECOMENDADA
+1. Sincroniza ahora con la base actual.
+2. Registra un animal de prueba en la app.
+3. Espera unos segundos o pulsa Sincronizar ahora.
+4. Comprueba que aparezca en Animales y Resumen_Animales.
+5. Registra un servicio reproductivo de prueba y verifica Eventos y Alertas_Repro.

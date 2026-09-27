@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#176b38">
 <link rel="manifest" href="manifest.json">
-<title>Rancho · Gestión Pecuaria V6.11</title>
+<title>Rancho · Gestión Pecuaria V6.12</title>
 <style>
 :root{--g:#176b38;--g2:#0d5229;--bg:#f3f7f3;--c:#fff;--t:#183024;--m:#68766d;--l:#dce6df;--r:#a73535;--a:#f4b942}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--t)}
@@ -26,7 +26,7 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-r
 </style>
 </head>
 <body>
-<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6.11 · Registro bovino, salud, producción, dietas y control del rancho</div></header>
+<header><div class="brand">🐄 RANCHO · GESTIÓN PECUARIA</div><div class="sub">V6.12 · Registro bovino, salud, producción, dietas y control del rancho</div></header>
 <main>
 <section id="home" class="view active">
   <div class="row between"><div><div class="title">Mis ranchos</div><div class="small">Administrador local</div></div><button class="btn primary" onclick="openFarm()">＋ Rancho</button></div>
@@ -131,16 +131,17 @@ const SUPABASE_KEY="sb_publishable_vNcIT6BmCqlTxL78Q4f6KA_Nkgqu_Y";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 let cloudUser=null, cloudBusy=false, cloudTimer=null, realtimeChannel=null;
 const V6KEY='rancho_v61_db';
-const APP_VERSION='6.11';
+const APP_VERSION='6.12';
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random().toString(16).slice(2)}
-function today(){return new Date().toISOString().slice(0,10)}
+function localISODate(d=new Date()){const x=new Date(d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`}
+function today(){return localISODate()}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function monthLabel(k){let [y,m]=k.split('-');return new Date(Number(y),Number(m)-1,1).toLocaleDateString('es-MX',{month:'short',year:'2-digit'}).replace('.','')}
 function blankDB(){return {version:69,farms:[],animals:[],events:[],campaigns:[],transactions:[],diets:[],reproAlerts:[],healthAlerts:[],sheetsSync:{url:'',enabled:false}}}
 function loadDB(){
-  try{let d=JSON.parse(localStorage.getItem(V6KEY)||'null');if(d&&Array.isArray(d.farms)){d.campaigns=d.campaigns||[];d.transactions=d.transactions||[];d.diets=d.diets||[];d.reproAlerts=d.reproAlerts||[];d.sheetsSync=d.sheetsSync||{url:'',enabled:false};d.animals=(d.animals||[]).map(a=>({...a,species:a.species||'Bovino',category:a.category||'',group:a.group||a.lot||''}));d.campaigns=(d.campaigns||[]).map(c=>({...c,targetSpecies:c.targetSpecies||'',targetCategory:c.targetCategory||'',targetGroup:c.targetGroup||'',intervalValue:c.intervalValue||c.intervalMonths||6,intervalUnit:c.intervalUnit||'meses'}));d.version=71;return d}}catch(e){}
+  try{let d=JSON.parse(localStorage.getItem(V6KEY)||'null');if(d&&Array.isArray(d.farms)){d.campaigns=d.campaigns||[];d.transactions=d.transactions||[];d.diets=d.diets||[];d.reproAlerts=d.reproAlerts||[];d.sheetsSync=d.sheetsSync||{url:'',enabled:false};d.animals=(d.animals||[]).map(a=>({...a,species:a.species||'Bovino',category:a.category||'',group:a.group||a.lot||''}));d.campaigns=(d.campaigns||[]).map(c=>({...c,targetSpecies:c.targetSpecies||'',targetCategory:c.targetCategory||'',targetGroup:c.targetGroup||'',intervalValue:c.intervalValue||c.intervalMonths||6,intervalUnit:c.intervalUnit||'meses'}));d.version=72;return d}}catch(e){}
   try{let old=JSON.parse(localStorage.getItem('rancho_v6_db')||localStorage.getItem('rancho_v5_db')||'null');if(old&&Array.isArray(old.farms)){
-    old.version=71;old.campaigns=old.campaigns||[];old.transactions=old.transactions||[];old.diets=old.diets||[];old.reproAlerts=old.reproAlerts||[];old.sheetsSync=old.sheetsSync||{url:'',enabled:false};old.animals=(old.animals||[]).map(a=>({...a,name:a.name||'',internalId:a.internalId||'',birthDate:a.birthDate||'',entryDate:a.entryDate||'',origin:a.origin||'',condition:a.condition||''}));
+    old.version=72;old.campaigns=old.campaigns||[];old.transactions=old.transactions||[];old.diets=old.diets||[];old.reproAlerts=old.reproAlerts||[];old.sheetsSync=old.sheetsSync||{url:'',enabled:false};old.animals=(old.animals||[]).map(a=>({...a,name:a.name||'',internalId:a.internalId||'',birthDate:a.birthDate||'',entryDate:a.entryDate||'',origin:a.origin||'',condition:a.condition||''}));
     old.animals=(old.animals||[]).map(a=>({...a,species:a.species||'Bovino',category:a.category||'',group:a.group||a.lot||''}));old.campaigns=(old.campaigns||[]).map(c=>({...c,targetSpecies:c.targetSpecies||'',targetCategory:c.targetCategory||'',targetGroup:c.targetGroup||'',intervalValue:c.intervalValue||c.intervalMonths||6,intervalUnit:c.intervalUnit||'meses'}));old.events=(old.events||[]).map(e=>({...e,diagnosis:e.diagnosis||'',treatment:e.treatment||'',attended:e.attended??(e.type==='health'),reproEvent:e.reproEvent||''}));
     return old;
   }}catch(e){}
@@ -158,8 +159,8 @@ function farmDiets(fid){return (db.diets||[]).filter(d=>d.farmId===fid)}
 function animalDiets(aid){return (db.diets||[]).filter(d=>d.animalId===aid).sort((x,y)=>(y.startDate||'').localeCompare(x.startDate||''))}
 function activeAnimals(fid){return farmAnimals(fid).filter(a=>!['Vendido','Muerto','Transferido'].includes(a.status||''))}
 function mapsUrl(f){return f?.lat&&f?.lng?`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(f.lat+','+f.lng)}`:''}
-function daysUntil(date){if(!date)return null;return Math.ceil((new Date(date+'T00:00:00')-new Date(today()+'T00:00:00'))/86400000)}
-function addDaysISO(date,n){if(!date)return '';let d=new Date(date+'T00:00:00');d.setDate(d.getDate()+Number(n));return d.toISOString().slice(0,10)}
+function daysUntil(date){if(!date)return null;return Math.round((new Date(date+'T00:00:00')-new Date(today()+'T00:00:00'))/86400000)}
+function addDaysISO(date,n){if(!date)return '';let d=new Date(date+'T00:00:00');d.setDate(d.getDate()+Number(n));return localISODate(d)}
 function latestCalving(aid){
   return db.events.filter(e=>e.animalId===aid&&e.type==='repro'&&e.reproEvent==='Parto')
     .sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0]||null;
@@ -291,7 +292,7 @@ function sheetRows(){
   (db.animals||[]).forEach(a=>{
     const p=latestCalving(a.id);
     const alerts=db.reproAlerts.filter(x=>x.animalId===a.id);
-    rows.push({tipo:'animal',id:a.id,rancho:a.farmId,arete:a.tag||'',nombre:a.name||'',sexo:a.sex||'',raza:a.breed||'',estado:a.status||'',estado_reproductivo:a.repro||'',fecha_parto:p?.date||'',dpp_hoy:p?.date?Math.floor((new Date(today())-new Date(p.date))/86400000):'',alerta_60:alerts.find(x=>x.day===60)?.attended?'Atendida':alerts.find(x=>x.day===60)?.dueDate||'',alerta_80:alerts.find(x=>x.day===80)?.attended?'Atendida':alerts.find(x=>x.day===80)?.dueDate||''});
+    rows.push({tipo:'animal',id:a.id,rancho:a.farmId,arete:a.tag||'',nombre:a.name||'',sexo:a.sex||'',raza:a.breed||'',estado:a.status||'',estado_reproductivo:reproductiveStatus(a)||'',fecha_parto:p?.date||'',dpp_hoy:p?.date?Math.floor((new Date(today())-new Date(p.date))/86400000):'',alerta_60:alerts.find(x=>x.day===60)?.attended?'Atendida':alerts.find(x=>x.day===60)?.dueDate||'',alerta_80:alerts.find(x=>x.day===80)?.attended?'Atendida':alerts.find(x=>x.day===80)?.dueDate||''});
   });
   return rows;
 }
@@ -396,8 +397,35 @@ async function cloudSignOut(){
 function rowFarm(f){
   return {id:f.id,owner_id:cloudUser.id,name:f.name||'Rancho sin nombre',ranch_code:f.ranchCode||null,owner_name:f.ownerName||null,manager:f.manager||null,locality:f.location||null,municipality:f.municipality||null,state:f.state||null,surface_ha:f.area!==''&&f.area!=null?Number(f.area):null,paddocks:f.paddocks!==''&&f.paddocks!=null?Number(f.paddocks):null,latitude:f.lat!==''&&f.lat!=null?Number(f.lat):null,longitude:f.lng!==''&&f.lng!=null?Number(f.lng):null,observations:f.notes||null,active:f.active!==false};
 }
+function reproEvents(aid){return db.events.filter(e=>e.animalId===aid&&e.type==='repro').slice().sort((x,y)=>{const dc=(y.date||'').localeCompare(x.date||'');if(dc)return dc;return (y.id||'').localeCompare(x.id||'')})}
+function latestService(aid){return reproEvents(aid).filter(e=>e.reproEvent==='Servicio')[0]||null}
+function latestDiagnosis(aid){return reproEvents(aid).filter(e=>['Diagnóstico positivo','Diagnóstico negativo'].includes(e.reproEvent))[0]||null}
+function reproductiveStatus(a){
+  const ev=reproEvents(a.id), service=ev.find(e=>e.reproEvent==='Servicio'), pos=ev.find(e=>e.reproEvent==='Diagnóstico positivo'), neg=ev.find(e=>e.reproEvent==='Diagnóstico negativo'), parto=ev.find(e=>e.reproEvent==='Parto');
+  if(parto && (!service || (parto.date||'') >= (service.date||'')) && (!pos || (parto.date||'') >= (pos.date||'')) && (!neg || (parto.date||'') >= (neg.date||''))) return 'Parida reciente';
+  if(service){
+    const sd=service.date||'';
+    if(pos && (pos.date||'') >= sd) return 'Gestante';
+    if(neg && (neg.date||'') >= sd) return 'Vacía';
+    return 'Servida – diagnóstico pendiente';
+  }
+  return a.repro||'—';
+}
+function reproductiveMetrics(a){
+  const service=latestService(a.id), diagnosis=latestDiagnosis(a.id), parto=latestCalving(a.id), status=reproductiveStatus(a);
+  const daysSinceService=service?.date?Math.max(0,Math.round((new Date(today()+'T00:00:00')-new Date(service.date+'T00:00:00'))/86400000)):null;
+  let daysOpen=null;
+  if(parto?.date){
+    const conceptionDate=status==='Gestante' && diagnosis?.date && diagnosis.date>=parto.date ? diagnosis.date : null;
+    const end=conceptionDate||today();
+    daysOpen=Math.max(0,Math.round((new Date(end+'T00:00:00')-new Date(parto.date+'T00:00:00'))/86400000));
+  }
+  const nextReview=service?.nextReviewDate||'';
+  const reviewDays=nextReview?daysUntil(nextReview):null;
+  return {service,diagnosis,parto,status,daysSinceService,daysOpen,nextReview,reviewDays};
+}
 function rowAnimal(a){
-  return {id:a.id,farm_id:a.farmId,owner_id:cloudUser.id,official_tag:a.tag||null,internal_number:a.internalId||null,name:a.name||null,species:a.species||'Bovino',breed:a.breed||null,sex:a.sex||null,lot:a.lot||null,birth_date:a.birthDate||null,entry_date:a.entryDate||null,origin:a.origin||null,weight:a.weight!==''&&a.weight!=null?Number(a.weight):null,body_condition:a.condition!==''&&a.condition!=null?Number(a.condition):null,sire:a.sire||null,dam:a.dam||null,reproductive_status:a.repro||null,status:(a.status||'active').toLowerCase()==='active'?'active':a.status||'active',observations:a.observations||null};
+  return {id:a.id,farm_id:a.farmId,owner_id:cloudUser.id,official_tag:a.tag||null,internal_number:a.internalId||null,name:a.name||null,species:a.species||'Bovino',breed:a.breed||null,sex:a.sex||null,lot:a.lot||null,birth_date:a.birthDate||null,entry_date:a.entryDate||null,origin:a.origin||null,weight:a.weight!==''&&a.weight!=null?Number(a.weight):null,body_condition:a.condition!==''&&a.condition!=null?Number(a.condition):null,sire:a.sire||null,dam:a.dam||null,reproductive_status:reproductiveStatus(a)||null,status:(a.status||'active').toLowerCase()==='active'?'active':a.status||'active',observations:a.observations||null};
 }
 function rowEvent(e){
   let bull=e.bullCode||e.bullOrSemen||'';
@@ -533,7 +561,7 @@ function photoPicked(input){
 }
 
 function renderHome(){
-  xFarms.textContent=db.farms.length;xAnimals.textContent=db.animals.filter(a=>!['Vendido','Muerto','Transferido'].includes(a.status||'')).length;xGest.textContent=db.animals.filter(a=>a.repro==='Gestante').length;
+  xFarms.textContent=db.farms.length;xAnimals.textContent=db.animals.filter(a=>!['Vendido','Muerto','Transferido'].includes(a.status||'')).length;xGest.textContent=db.animals.filter(a=>reproductiveStatus(a)==='Gestante').length;
   xMilk.textContent=db.events.filter(e=>e.type==='milk').reduce((s,e)=>s+Number(e.liters||0),0).toFixed(1)+' L';
   farmList.innerHTML=db.farms.length?db.farms.map(f=>{let n=farmAnimals(f.id).length;return `<div class="farm" onclick="selectFarm('${f.id}')"><div class="row between"><div><b>🐄 ${esc(f.name)}</b><div class="small">${esc(f.location||'Ubicación no registrada')} · ${esc(f.production||'Producción general')}</div></div><span class="tag">${n} animales</span></div></div>`}).join(''):'<div class="empty">Aún no tienes ranchos.<br><br><button class="btn primary" onclick="openFarm()">＋ Crear primer rancho</button></div>'
 }
@@ -542,10 +570,10 @@ function renderFarm(){
   let f=db.farms.find(x=>x.id===currentFarm);if(!f)return;let aa=farmAnimals(f.id),q=(document.getElementById('search')?.value||'').toLowerCase();
   farmHead.innerHTML=`<div class="card"><div class="row between"><div><div class="title">🐄 ${esc(f.name)}</div><div class="small">${esc(f.location||'')} · Responsable: ${esc(f.manager||'—')}</div></div><div class="row"><button class="btn secondary" onclick="openFarm('${f.id}')">Editar</button><button class="btn danger" onclick="deleteFarm('${f.id}')">Eliminar</button></div></div></div>`;
   let list=aa.filter(a=>(a.tag+' '+a.name+' '+a.breed+' '+a.lot+' '+a.internalId).toLowerCase().includes(q));
-  fAnimals.textContent=aa.length;fFemales.textContent=aa.filter(a=>a.sex==='Hembra').length;fPreg.textContent=aa.filter(a=>a.repro==='Gestante').length;
+  fAnimals.textContent=aa.length;fFemales.textContent=aa.filter(a=>a.sex==='Hembra').length;fPreg.textContent=aa.filter(a=>reproductiveStatus(a)==='Gestante').length;
   fMilk.textContent=farmEvents(f.id).filter(e=>e.type==='milk').reduce((s,e)=>s+Number(e.liters||0),0).toFixed(1)+' L';
   renderFarmModules(f);
-  animalList.innerHTML=list.length?list.map(a=>`<div class="animal" onclick="selectAnimal('${a.id}')"><div class="avatar">${a.photo?`<img src="${a.photo}" style="width:44px;height:44px;object-fit:cover;border-radius:12px">`:'🐄'}</div><div style="flex:1"><b>${esc(a.name||'Sin nombre')} <span class="small">(${esc(a.tag)})</span></b><div class="small">${esc(a.species||'Bovino')} · ${esc(a.category||'Sin categoría')} · ${esc(a.breed||'Sin raza')} · Grupo ${esc(a.group||a.lot||'—')} · Int. ${esc(a.internalId||'—')}</div></div><span class="tag">${esc(a.repro||'No aplica')}</span>›</div>`).join(''):'<div class="empty">Sin animales registrados.</div>'
+  animalList.innerHTML=list.length?list.map(a=>`<div class="animal" onclick="selectAnimal('${a.id}')"><div class="avatar">${a.photo?`<img src="${a.photo}" style="width:44px;height:44px;object-fit:cover;border-radius:12px">`:'🐄'}</div><div style="flex:1"><b>${esc(a.name||'Sin nombre')} <span class="small">(${esc(a.tag)})</span></b><div class="small">${esc(a.species||'Bovino')} · ${esc(a.category||'Sin categoría')} · ${esc(a.breed||'Sin raza')} · Grupo ${esc(a.group||a.lot||'—')} · Int. ${esc(a.internalId||'—')}</div></div><span class="tag">${esc(reproductiveStatus(a)||'No aplica')}</span>›</div>`).join(''):'<div class="empty">Sin animales registrados.</div>'
 }
 
 function renderReproAlertsCard(fid){
@@ -577,15 +605,27 @@ function selectAnimal(id){currentAnimal=id;show('animal')}
 function renderAnimal(){
   let a=db.animals.find(x=>x.id===currentAnimal),f=db.farms.find(x=>x.id===a?.farmId);if(!a)return;
   let ev=db.events.filter(e=>e.animalId===a.id).sort((x,y)=>y.date.localeCompare(x.date));
-  let ds=animalDiets(a.id);
-  let milkEvents=ev.filter(e=>e.type==='milk');
+  let ds=animalDiets(a.id), milkEvents=ev.filter(e=>e.type==='milk');
   let avgMilk=milkEvents.length?(milkEvents.reduce((s,e)=>s+Number(e.liters||0),0)/milkEvents.length).toFixed(1):'—';
+  const rm=reproductiveMetrics(a), reviewText=rm.nextReview?(rm.reviewDays<0?`Vencida hace ${Math.abs(rm.reviewDays)} días`:rm.reviewDays===0?'Hoy':`En ${rm.reviewDays} días`):'—';
   animalDetail.innerHTML=`<div class="card" style="margin-top:12px"><div class="row between"><div class="row" style="align-items:center"><div>${a.photo?`<img class="animalphoto" src="${a.photo}" alt="Foto del animal">`:'<div class="animalphoto" style="display:grid;place-items:center;font-size:38px">🐄</div>'}</div><div><div class="title">🐄 ${esc(a.name||'Sin nombre')}</div><div class="small">Arete: ${esc(a.tag)} · ${esc(f?.name||'')} · Estado: ${esc(a.status||'Activo')}</div></div></div><button class="btn secondary" onclick="openAnimal('${a.id}')">Editar ficha</button></div>
   <div class="profilegrid" style="margin-top:12px">
   <div><span>Arete</span><b>${esc(a.tag)}</b></div><div><span>Número interno</span><b>${esc(a.internalId||'—')}</b></div><div><span>Raza</span><b>${esc(a.breed||'—')}</b></div><div><span>Sexo</span><b>${esc(a.sex)}</b></div>
   <div><span>Fecha nacimiento</span><b>${esc(a.birthDate||'—')}</b></div><div><span>Ingreso</span><b>${esc(a.entryDate||'—')}</b></div><div><span>Lote</span><b>${esc(a.lot||'—')}</b></div><div><span>Peso</span><b>${esc(a.weight||'—')} kg</b></div>
-  <div><span>Estado reproductivo</span><b>${esc(a.repro||'—')}</b></div><div><span>Padre</span><b>${esc(a.sire||'—')}</b></div><div><span>Madre</span><b>${esc(a.dam||'—')}</b></div><div><span>Condición corporal</span><b>${esc(a.condition||'—')}</b></div>
-  </div><div class="kpi" style="margin-top:10px"><div class="pill"><b>${milkEvents.length}</b><span class="small">Registros de leche</span></div><div class="pill"><b>${avgMilk}${avgMilk==='—'?'':' L'}</b><span class="small">Promedio registrado</span></div><div class="pill"><b>${ds.length}</b><span class="small">Dietas registradas</span></div><div class="pill"><b>${ev.length}</b><span class="small">Eventos totales</span></div></div>
+  <div><span>Estado reproductivo</span><b>${esc(rm.status)}</b></div><div><span>Padre</span><b>${esc(a.sire||'—')}</b></div><div><span>Madre</span><b>${esc(a.dam||'—')}</b></div><div><span>Condición corporal</span><b>${esc(a.condition||'—')}</b></div>
+  </div>
+  <div class="section">🧬 Resumen reproductivo</div>
+  <div class="profilegrid">
+    <div><span>Último servicio</span><b>${esc(rm.service?.date||'—')}</b></div>
+    <div><span>Días desde último servicio</span><b>${rm.daysSinceService==null?'—':rm.daysSinceService+' días'}</b></div>
+    <div><span>Revisión programada</span><b>${esc(rm.nextReview||'—')}</b></div>
+    <div><span>Estado de revisión</span><b>${esc(reviewText)}</b></div>
+    <div><span>Último diagnóstico</span><b>${esc(rm.diagnosis?.date||'—')}</b></div>
+    <div><span>Resultado</span><b>${esc(rm.diagnosis?.reproEvent||'Pendiente')}</b></div>
+    <div><span>Último parto</span><b>${esc(rm.parto?.date||'—')}</b></div>
+    <div><span>Días abiertos</span><b>${rm.daysOpen==null?'—':rm.daysOpen+' días'}</b></div>
+  </div>
+  <div class="kpi" style="margin-top:10px"><div class="pill"><b>${milkEvents.length}</b><span class="small">Registros de leche</span></div><div class="pill"><b>${avgMilk}${avgMilk==='—'?'':' L'}</b><span class="small">Promedio registrado</span></div><div class="pill"><b>${ds.length}</b><span class="small">Dietas registradas</span></div><div class="pill"><b>${ev.length}</b><span class="small">Eventos totales</span></div></div>
   <div class="section">Registrar</div><div class="row"><button class="btn primary" onclick="openEvent('milk')">🥛 Leche</button><button class="btn secondary" onclick="openEvent('repro')">🧬 Reproducción</button><button class="btn secondary" onclick="openEvent('health')">🩺 Salud</button><button class="btn secondary" onclick="openDiet()">🥣 Dieta</button></div></div>
   <div class="section row between"><span>🥣 Historial de dietas</span><button class="btn primary" onclick="openDiet()">＋ Registrar dieta</button></div>
   <div class="card">${ds.length?ds.map(d=>`<div class="event"><b>🥣 ${esc(d.name||'Dieta sin nombre')}</b><div class="small">${esc(d.startDate||'')} → ${esc(d.endDate||'Vigente')} · ${d.kgPerDay?esc(d.kgPerDay)+' kg/animal/día · ':''}${d.weightStart?esc(d.weightStart)+' kg · ':''}${d.conditionStart?'CC '+esc(d.conditionStart):''}</div><div class="small">${d.composition?esc(d.composition):''}${d.milkStart?' · Leche al inicio: '+esc(d.milkStart)+' L':''}${d.responsible?' · Responsable: '+esc(d.responsible):''}</div>${d.notes?`<div class="small">📝 ${esc(d.notes)}</div>`:''}</div>`).join(''):'<div class="empty">Sin dietas registradas para este animal.</div>'}</div>
@@ -625,7 +665,7 @@ function svgBars(data,series,label){
 function reportBox(title,sub,svg){return `<div class="chartbox"><div class="charttitle">${title}</div><div class="chartsub">${sub}</div>${svg}</div>`}
 function renderReproReport(an,ev){
   let months=recentMonths(6),data=months.map(k=>({label:monthLabel(k),value:ev.filter(e=>e.date?.startsWith(k)).length}));
-  let preg=an.filter(a=>a.repro==='Gestante').length,vac=an.filter(a=>a.sex==='Hembra'&&a.repro!=='Gestante').length,total=an.filter(a=>a.sex==='Hembra').length;
+  let preg=an.filter(a=>reproductiveStatus(a)==='Gestante').length,vac=an.filter(a=>a.sex==='Hembra'&&reproductiveStatus(a)!=='Gestante').length,total=an.filter(a=>a.sex==='Hembra').length;
   let pos=ev.filter(e=>e.reproEvent==='Diagnóstico positivo').length,neg=ev.filter(e=>e.reproEvent==='Diagnóstico negativo').length,services=ev.filter(e=>e.reproEvent==='Servicio').length;
   let tc=(pos+neg)?(pos/(pos+neg)*100).toFixed(1):'0.0';
   reportContent.innerHTML=`<div class="kpi"><div class="pill"><span class="small">Hembras</span><b>${total}</b></div><div class="pill"><span class="small">Gestantes</span><b>${preg}</b></div><div class="pill"><span class="small">Servicios</span><b>${services}</b></div><div class="pill"><span class="small">Concepción</span><b>${tc}%</b></div></div>
@@ -682,10 +722,10 @@ function openAnimal(id=''){
   <div class="grid"><div class="field"><label>Fecha de nacimiento</label><input id="aaBirth" type="date" value="${esc(a.birthDate||'')}"></div><div class="field"><label>Fecha de ingreso</label><input id="aaEntry" type="date" value="${esc(a.entryDate||'')}"></div></div>
   <div class="grid"><div class="field"><label>Padre</label><input id="aa6" value="${esc(a.sire||'')}"></div><div class="field"><label>Madre</label><input id="aa7" value="${esc(a.dam||'')}"></div></div>
   <div class="field"><label>Procedencia</label><input id="aaOrigin" placeholder="Nacimiento, compra, otro rancho..." value="${esc(a.origin||'')}"></div>
-  <div class="field"><label>Estado reproductivo</label><select id="aa8"><option>No aplica</option><option>Vacía</option><option>Gestante</option><option>Seca</option><option>Parida reciente</option><option>Novilla</option></select></div>
+  <div class="field"><label>Estado reproductivo</label><select id="aa8"><option>No aplica</option><option>Vacía</option><option>Gestante</option><option>Servida – diagnóstico pendiente</option><option>Seca</option><option>Parida reciente</option><option>Novilla</option></select></div>
   <div class="field"><label>📷 Foto del animal</label><div class="photo-preview">${a.photo?`<img class="animalphoto" src="${a.photo}" alt="Foto actual">`:''}</div><div class="row"><button type="button" class="btn secondary" onclick="aaCamera.click()">📷 Tomar foto</button><button type="button" class="btn secondary" onclick="aaGallery.click()">🖼️ Galería</button></div><input id="aaCamera" type="file" accept="image/*" capture="environment" style="display:none" onchange="photoPicked(this)"><input id="aaGallery" type="file" accept="image/*" style="display:none" onchange="photoPicked(this)"><input id="aaPhoto" type="file" accept="image/*" style="display:none"><div id="photoChosen" class="small">No se ha seleccionado una nueva foto.</div><div class="small">La foto se guarda localmente. La ficha y el respaldo la conservan; la sincronización de fotos a almacenamiento de nube se incorporará después para no arriesgar tus imágenes durante la primera migración.</div></div>
   <button class="btn primary">${id?'Guardar cambios':'Guardar animal'}</button></form>`;
-  aaSpecies.value=a.species||'Bovino';aaCategory.value=a.category||'';aaGroup.value=a.group||a.lot||'';aa2.value=a.sex||'Hembra';aa8.value=a.repro||'No aplica';modal.classList.add('open')
+  aaSpecies.value=a.species||'Bovino';aaCategory.value=a.category||'';aaGroup.value=a.group||a.lot||'';aa2.value=a.sex||'Hembra';aa8.value=reproductiveStatus(a)||a.repro||'No aplica';modal.classList.add('open')
 }
 async function imageToDataUrl(file){
   if(!file)return '';
@@ -724,9 +764,9 @@ function saveEvent(e,type){
 }
 function closeModal(){modal.classList.remove('open')}
 function backupBlob(){return new Blob([JSON.stringify({...db,exportedAt:new Date().toISOString(),appVersion:APP_VERSION},null,2)],{type:'application/json'})}
-function backup(){let blob=backupBlob(),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rancho_Pecuario_V611_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
-async function shareBackup(){let blob=backupBlob(),name='Rancho_Pecuario_V611_'+today()+'.json';try{let file=new File([blob],name,{type:'application/json'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:'Respaldo Rancho Gestión Pecuaria',text:'Respaldo de datos para transferir a otro dispositivo.',files:[file]});return;}backup();alert('Este dispositivo no permite compartir archivos directamente. Se descargó el respaldo; puedes enviarlo por WhatsApp, Drive o correo.')}catch(err){if(err&&err.name==='AbortError')return;backup();alert('Se descargó el respaldo para que puedas enviarlo al otro dispositivo.')}}
-function restore(e){let f=e.target.files[0];if(!f)return;if(!confirm('Esto reemplazará los datos actuales de ESTE dispositivo por los del respaldo. ¿Continuar?')){e.target.value='';return;}let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.farms)||!Array.isArray(d.animals)||!Array.isArray(d.events))throw 0;db=d;db.version=71;db.reproAlerts=db.reproAlerts||[];db.healthAlerts=db.healthAlerts||[];db.sheetsSync=db.sheetsSync||{url:'',enabled:false};db.campaigns=db.campaigns||[];db.transactions=db.transactions||[];db.diets=db.diets||[];save();currentFarm=null;currentAnimal=null;show('home');alert('Respaldo restaurado correctamente.')}catch{alert('Respaldo no válido.')}};r.readAsText(f);e.target.value=''}
+function backup(){let blob=backupBlob(),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rancho_Pecuario_V612_'+today()+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+async function shareBackup(){let blob=backupBlob(),name='Rancho_Pecuario_V612_'+today()+'.json';try{let file=new File([blob],name,{type:'application/json'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:'Respaldo Rancho Gestión Pecuaria',text:'Respaldo de datos para transferir a otro dispositivo.',files:[file]});return;}backup();alert('Este dispositivo no permite compartir archivos directamente. Se descargó el respaldo; puedes enviarlo por WhatsApp, Drive o correo.')}catch(err){if(err&&err.name==='AbortError')return;backup();alert('Se descargó el respaldo para que puedas enviarlo al otro dispositivo.')}}
+function restore(e){let f=e.target.files[0];if(!f)return;if(!confirm('Esto reemplazará los datos actuales de ESTE dispositivo por los del respaldo. ¿Continuar?')){e.target.value='';return;}let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.farms)||!Array.isArray(d.animals)||!Array.isArray(d.events))throw 0;db=d;db.version=72;db.reproAlerts=db.reproAlerts||[];db.healthAlerts=db.healthAlerts||[];db.sheetsSync=db.sheetsSync||{url:'',enabled:false};db.campaigns=db.campaigns||[];db.transactions=db.transactions||[];db.diets=db.diets||[];save();currentFarm=null;currentAnimal=null;show('home');alert('Respaldo restaurado correctamente.')}catch{alert('Respaldo no válido.')}};r.readAsText(f);e.target.value=''}
 ensureReproAlerts();startReproAlertEngine();save();renderAll();show('home');initCloud();if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js?v=71').catch(()=>{}));
 </script>
 </body>

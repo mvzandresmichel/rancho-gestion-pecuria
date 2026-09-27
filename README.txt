@@ -1,4 +1,4 @@
-Rancho Gestión Pecuaria V6.11 — Nube
+Rancho Gestión Pecuaria V6.12 — Nube
 - Conexión Supabase configurada con Project URL y Publishable key.
 - Autenticación por correo/contraseña.
 - Migración local -> nube mediante "Subir datos locales a la nube".
@@ -74,3 +74,11 @@ V6.11 - EVENTOS DE SERVICIO / INSEMINACIÓN
 - La próxima revisión de celo se calcula automáticamente a 21 días del servicio.
 - La revisión de celo genera una alerta reproductiva y notificación cuando corresponde.
 - Los datos se conservan en el historial reproductivo y se mantienen compatibles con la sincronización existente.
+
+
+V6.12 - CORRECCIÓN DE ESTADO REPRODUCTIVO Y CÁLCULOS DINÁMICOS
+- La ficha individual ya no muestra “Vacía” solo por tener ese valor inicial cuando existe un servicio sin diagnóstico posterior.
+- Después de registrar un servicio, el estado se muestra como “Servida – diagnóstico pendiente” hasta registrar un diagnóstico positivo o negativo posterior al servicio.
+- La ficha muestra el último servicio, días desde el último servicio, fecha de revisión programada, estado de la revisión, último diagnóstico y días abiertos.
+- Los días desde el último servicio y los días abiertos se recalculan con la fecha local actual del dispositivo, evitando desfases por UTC/zona horaria.
+- La fecha de revisión del servicio continúa calculándose a 21 días y se conserva en el historial y las alertas.
